@@ -35,7 +35,7 @@ const Navbar = () => {
           </div>
           <div className="flex items-center">
             <Link to="/login">
-              <button className="inline-flex cursor-pointer items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <button className="inline-flex cursor-pointer items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-black focus:outline-none focus:ring-2 focus:ring-offset-2 ">
                 CMS Dashboard
               </button>
             </Link>
