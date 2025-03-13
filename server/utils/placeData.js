@@ -1,0 +1,538 @@
+const nepaliDistricts = [
+  {
+    title: "Taplejung",
+    location: {
+      latitude: "27.3538",
+      longitude: "87.6698",
+    },
+    district: "Taplejung",
+    province: "Province 1",
+    description: "Eastern mountain district of Nepal",
+    images: [],
+  },
+  {
+    title: "Panchthar",
+    location: {
+      latitude: "27.1247",
+      longitude: "87.8158",
+    },
+    district: "Panchthar",
+    province: "Province 1",
+    description: "Eastern hill district of Nepal",
+    images: [],
+  },
+  {
+    title: "Ilam",
+    location: {
+      latitude: "26.9125",
+      longitude: "87.9236",
+    },
+    district: "Ilam",
+    province: "Province 1",
+    description: "Tea-producing district in eastern Nepal",
+    images: [],
+  },
+  {
+    title: "Jhapa",
+    location: {
+      latitude: "26.6398",
+      longitude: "87.8942",
+    },
+    district: "Jhapa",
+    province: "Province 1",
+    description: "Terai district in eastern Nepal",
+    images: [],
+  },
+  {
+    title: "Morang",
+    location: {
+      latitude: "26.6799",
+      longitude: "87.4604",
+    },
+    district: "Morang",
+    province: "Province 1",
+    description: "Industrial district in eastern Nepal",
+    images: [],
+  },
+  {
+    title: "Sunsari",
+    location: {
+      latitude: "26.6275",
+      longitude: "87.1822",
+    },
+    district: "Sunsari",
+    province: "Province 1",
+    description: "Eastern terai district of Nepal",
+    images: [],
+  },
+  {
+    title: "Dhankuta",
+    location: {
+      latitude: "26.9946",
+      longitude: "87.3318",
+    },
+    district: "Dhankuta",
+    province: "Province 1",
+    description: "Eastern hill district of Nepal",
+    images: [],
+  },
+  {
+    title: "Terhathum",
+    location: {
+      latitude: "27.1213",
+      longitude: "87.5357",
+    },
+    district: "Terhathum",
+    province: "Province 1",
+    description: "Eastern hill district known for handloom products",
+    images: [],
+  },
+  {
+    title: "Sankhuwasabha",
+    location: {
+      latitude: "27.6141",
+      longitude: "87.1422",
+    },
+    district: "Sankhuwasabha",
+    province: "Province 1",
+    description: "Northeastern mountain district with Makalu peak",
+    images: [],
+  },
+  {
+    title: "Bhojpur",
+    location: {
+      latitude: "27.1778",
+      longitude: "87.0483",
+    },
+    district: "Bhojpur",
+    province: "Province 1",
+    description: "Eastern hill district known for khukuri knives",
+    images: [],
+  },
+  {
+    title: "Solukhumbu",
+    location: {
+      latitude: "27.7909",
+      longitude: "86.6673",
+    },
+    district: "Solukhumbu",
+    province: "Province 1",
+    description: "Mountain district with Mount Everest",
+    images: [],
+  },
+  {
+    title: "Okhaldhunga",
+    location: {
+      latitude: "27.3245",
+      longitude: "86.5045",
+    },
+    district: "Okhaldhunga",
+    province: "Province 1",
+    description: "Eastern hill district of Nepal",
+    images: [],
+  },
+  {
+    title: "Khotang",
+    location: {
+      latitude: "27.0279",
+      longitude: "86.8413",
+    },
+    district: "Khotang",
+    province: "Province 1",
+    description: "Eastern hill district of Nepal",
+    images: [],
+  },
+  {
+    title: "Udayapur",
+    location: {
+      latitude: "26.9452",
+      longitude: "86.7005",
+    },
+    district: "Udayapur",
+    province: "Province 1",
+    description: "Inner terai district in eastern Nepal",
+    images: [],
+  },
+
+  // Madhesh Province
+  {
+    title: "Saptari",
+    location: {
+      latitude: "26.6732",
+      longitude: "86.7466",
+    },
+    district: "Saptari",
+    province: "Madhesh Province",
+    description: "Terai district in southeastern Nepal",
+    images: [],
+  },
+  {
+    title: "Siraha",
+    location: {
+      latitude: "26.6545",
+      longitude: "86.2186",
+    },
+    district: "Siraha",
+    province: "Madhesh Province",
+    description: "Terai district in southeastern Nepal",
+    images: [],
+  },
+  {
+    title: "Dhanusha",
+    location: {
+      latitude: "26.8492",
+      longitude: "85.9044",
+    },
+    district: "Dhanusha",
+    province: "Madhesh Province",
+    description: "Terai district with cultural importance",
+    images: [],
+  },
+  {
+    title: "Mahottari",
+    location: {
+      latitude: "26.8764",
+      longitude: "85.7814",
+    },
+    district: "Mahottari",
+    province: "Madhesh Province",
+    description: "Terai district in southern Nepal",
+    images: [],
+  },
+  {
+    title: "Sarlahi",
+    location: {
+      latitude: "26.9627",
+      longitude: "85.5612",
+    },
+    district: "Sarlahi",
+    province: "Madhesh Province",
+    description: "Agricultural district in southern Nepal",
+    images: [],
+  },
+  {
+    title: "Rautahat",
+    location: {
+      latitude: "27.0178",
+      longitude: "85.3136",
+    },
+    district: "Rautahat",
+    province: "Madhesh Province",
+    description: "Terai district in south-central Nepal",
+    images: [],
+  },
+  {
+    title: "Bara",
+    location: {
+      latitude: "27.1182",
+      longitude: "85.0627",
+    },
+    district: "Bara",
+    province: "Madhesh Province",
+    description: "Industrial district in southern Nepal",
+    images: [],
+  },
+  {
+    title: "Parsa",
+    location: {
+      latitude: "27.0432",
+      longitude: "84.8760",
+    },
+    district: "Parsa",
+    province: "Madhesh Province",
+    description: "Border district with India in southern Nepal",
+    images: [],
+  },
+
+  // Bagmati Province
+  {
+    title: "Sindhuli",
+    location: {
+      latitude: "27.2579",
+      longitude: "85.9714",
+    },
+    district: "Sindhuli",
+    province: "Bagmati Province",
+    description: "Inner terai district in central Nepal",
+    images: [],
+  },
+  {
+    title: "Ramechhap",
+    location: {
+      latitude: "27.3915",
+      longitude: "86.1938",
+    },
+    district: "Ramechhap",
+    province: "Bagmati Province",
+    description: "Central hill district of Nepal",
+    images: [],
+  },
+  {
+    title: "Dolakha",
+    location: {
+      latitude: "27.7615",
+      longitude: "86.1751",
+    },
+    district: "Dolakha",
+    province: "Bagmati Province",
+    description: "Mountain district with Gaurishankar peak",
+    images: [],
+  },
+  {
+    title: "Sindhupalchok",
+    location: {
+      latitude: "27.9566",
+      longitude: "85.6837",
+    },
+    district: "Sindhupalchok",
+    province: "Bagmati Province",
+    description: "Mountain district north of Kathmandu",
+    images: [],
+  },
+  {
+    title: "Kavrepalanchok",
+    location: {
+      latitude: "27.5295",
+      longitude: "85.5623",
+    },
+    district: "Kavrepalanchok",
+    province: "Bagmati Province",
+    description: "Hill district east of Kathmandu Valley",
+    images: [],
+  },
+  {
+    title: "Lalitpur",
+    location: {
+      latitude: "27.6146",
+      longitude: "85.3420",
+    },
+    district: "Lalitpur",
+    province: "Bagmati Province",
+    description: "Urban district in Kathmandu Valley",
+    images: [],
+  },
+  {
+    title: "Bhaktapur",
+    location: {
+      latitude: "27.6712",
+      longitude: "85.4284",
+    },
+    district: "Bhaktapur",
+    province: "Bagmati Province",
+    description: "Historical district in Kathmandu Valley",
+    images: [],
+  },
+  {
+    title: "Kathmandu",
+    location: {
+      latitude: "27.7172",
+      longitude: "85.3240",
+    },
+    district: "Kathmandu",
+    province: "Bagmati Province",
+    description: "Capital district of Nepal",
+    images: [],
+  },
+  {
+    title: "Nuwakot",
+    location: {
+      latitude: "27.9188",
+      longitude: "85.1641",
+    },
+    district: "Nuwakot",
+    province: "Bagmati Province",
+    description: "Hill district northwest of Kathmandu",
+    images: [],
+  },
+  {
+    title: "Rasuwa",
+    location: {
+      latitude: "28.1754",
+      longitude: "85.3835",
+    },
+    district: "Rasuwa",
+    province: "Bagmati Province",
+    description: "Northern border district with Tibet",
+    images: [],
+  },
+  {
+    title: "Dhading",
+    location: {
+      latitude: "27.9712",
+      longitude: "84.8985",
+    },
+    district: "Dhading",
+    province: "Bagmati Province",
+    description: "Central hill district west of Kathmandu",
+    images: [],
+  },
+  {
+    title: "Makwanpur",
+    location: {
+      latitude: "27.5546",
+      longitude: "85.0233",
+    },
+    district: "Makwanpur",
+    province: "Bagmati Province",
+    description: "Inner terai district in central Nepal",
+    images: [],
+  },
+  {
+    title: "Chitwan",
+    location: {
+      latitude: "27.5291",
+      longitude: "84.3542",
+    },
+    district: "Chitwan",
+    province: "Bagmati Province",
+    description: "District with famous national park",
+    images: [],
+  },
+
+  // Gandaki Province
+  {
+    title: "Gorkha",
+    location: {
+      latitude: "28.0020",
+      longitude: "84.6169",
+    },
+    district: "Gorkha",
+    province: "Gandaki Province",
+    description: "Historical district in central Nepal",
+    images: [],
+  },
+  {
+    title: "Manang",
+    location: {
+      latitude: "28.6667",
+      longitude: "84.0167",
+    },
+    district: "Manang",
+    province: "Gandaki Province",
+    description: "Trans-Himalayan mountain district",
+    images: [],
+  },
+  {
+    title: "Mustang",
+    location: {
+      latitude: "28.9985",
+      longitude: "83.8473",
+    },
+    district: "Mustang",
+    province: "Gandaki Province",
+    description: "Trans-Himalayan district with Buddhist culture",
+    images: [],
+  },
+  {
+    title: "Myagdi",
+    location: {
+      latitude: "28.6029",
+      longitude: "83.3360",
+    },
+    district: "Myagdi",
+    province: "Gandaki Province",
+    description: "Mountain district in central Nepal",
+    images: [],
+  },
+  {
+    title: "Kaski",
+    location: {
+      latitude: "28.2622",
+      longitude: "84.0167",
+    },
+    district: "Kaski",
+    province: "Gandaki Province",
+    description: "District with Pokhara and Phewa Lake",
+    images: [],
+  },
+  {
+    title: "Lamjung",
+    location: {
+      latitude: "28.2765",
+      longitude: "84.3542",
+    },
+    district: "Lamjung",
+    province: "Gandaki Province",
+    description: "Hill district in central Nepal",
+    images: [],
+  },
+  {
+    title: "Tanahu",
+    location: {
+      latitude: "27.9447",
+      longitude: "84.2279",
+    },
+    district: "Tanahu",
+    province: "Gandaki Province",
+    description: "Hill district south of Kaski",
+    images: [],
+  },
+  {
+    title: "Nawalparasi East",
+    location: {
+      latitude: "27.6877",
+      longitude: "84.1227",
+    },
+    district: "Nawalparasi East",
+    province: "Gandaki Province",
+    description: "Eastern part of former Nawalparasi district",
+    images: [],
+  },
+  {
+    title: "Syangja",
+    location: {
+      latitude: "28.0196",
+      longitude: "83.8054",
+    },
+    district: "Syangja",
+    province: "Gandaki Province",
+    description: "Hill district southwest of Pokhara",
+    images: [],
+  },
+  {
+    title: "Parbat",
+    location: {
+      latitude: "28.2234",
+      longitude: "83.6966",
+    },
+    district: "Parbat",
+    province: "Gandaki Province",
+    description: "Hill district in central Nepal",
+    images: [],
+  },
+  {
+    title: "Baglung",
+    location: {
+      latitude: "28.2721",
+      longitude: "83.5829",
+    },
+    district: "Baglung",
+    province: "Gandaki Province",
+    description: "Western hill district of Nepal",
+    images: [],
+  },
+
+  {
+    title: "Gulmi",
+    location: {
+      latitude: "28.0889",
+      longitude: "83.2934",
+    },
+    district: "Gulmi",
+    province: "Lumbini Province",
+    description: "Hill district in western Nepal",
+    images: [],
+  },
+  {
+    title: "Palpa",
+    location: {
+      latitude: "27.8253",
+      longitude: "83.5472",
+    },
+    district: "Palpa",
+    province: "Lumbini Province",
+    description: "Hill district with historical importance",
+    images: [],
+  },
+];
+export default nepaliDistricts;
