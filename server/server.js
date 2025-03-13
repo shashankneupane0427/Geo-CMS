@@ -5,6 +5,7 @@ import morgan from "morgan";
 import mongoose from "mongoose";
 import GlobalError from "./Errors/GlobalError.js";
 import userRoutes from "./routes/generalUsersRoute.js";
+import cors from "cors";
 
 configDotenv();
 const app = express();
@@ -14,6 +15,11 @@ mongoose
   .catch((err) => console.log(`couldnot connect to databse ${err.message}`));
 
 app.use(morgan("dev"));
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 app.use(bodyParser.json());
 app.use("/api/v1/generalUsers", userRoutes);
 

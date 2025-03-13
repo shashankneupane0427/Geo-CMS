@@ -3,7 +3,8 @@ import MarkerClusterGroup from "react-leaflet-cluster";
 import "leaflet/dist/leaflet.css";
 
 import "leaflet.awesome-markers";
-
+import { useEffect, useState } from "react";
+import { getAllPlaces } from "../utils/Api";
 const markers = [
   {
     geocode: [28.3949, 84.124], // Gandaki Province (Pokhara)
@@ -48,25 +49,41 @@ const markers = [
 ];
 
 function App() {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    const getPlace = async () => {
+      const response = await getAllPlaces();
+      setData(response.data.data);
+    };
+    getPlace();
+  }, []);
+  useEffect(() => {
+    console.log(data);
+  }, [data]);
+  if (data === null || !data) {
+    return <>loading</>;
+  }
+
   return (
     <>
-      <div className="">
-        <h1 className="text-center text-3xl font-bold text-gray-800 mt-10"></h1>
-        <MapContainer center={[28.3949, 84.124]} zoom={7}>
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          <MarkerClusterGroup chunkedLoading>
-            {/* Mapping through the markers */}
-            {markers.map((marker, index) => (
-              <Marker key={index} position={marker.geocode}>
-                <Popup>{marker.popUp}</Popup>
-              </Marker>
-            ))}
-          </MarkerClusterGroup>
-        </MapContainer>
-      </div>
+      <MapContainer center={[28.3949, 84.124]} zoom={7}>
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        {/* Mapping through the markers */}
+        <MarkerClusterGroup chunkedLoading>
+          {data.map((place, index) => (
+            <Marker
+              key={index}
+              position={[place.location.latitude, place.location.longitude]}
+            >
+              <Popup>{place.description}</Popup>
+            </Marker>
+          ))}
+        </MarkerClusterGroup>
+      </MapContainer>
     </>
   );
 }
