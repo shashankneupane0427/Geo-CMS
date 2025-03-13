@@ -450,7 +450,7 @@ const SuperAdmin = () => {
       {/* Sidebar */}
       <div className="w-64 bg-gray-200 flex flex-col">
         <div className="p-6">
-          <h1 className="text-2xl font-bold">CMS</h1>
+          <h1 className="text-2xl font-bold">Geo CMS</h1>
         </div>
         <div className="mt-4">
           <button
