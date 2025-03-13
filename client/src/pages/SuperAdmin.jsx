@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import { getAllSuperAdminData } from "../../utils/Api";
+import { deleteSpecificUser, getAllSuperAdminData } from "../../utils/Api";
+import { toast } from "sonner";
 
 const SuperAdmin = () => {
   // Tab state management
@@ -131,11 +132,6 @@ const SuperAdmin = () => {
     sendRequest();
   }, []);
 
-  useEffect(() => {
-    console.log("users are", users);
-    console.log("places are", places);
-  }, [users, places]);
-
   const newPlaceTemplate = {
     id: null,
     title: "",
@@ -198,8 +194,13 @@ const SuperAdmin = () => {
   };
 
   // Handle user delete
-  const handleDeleteUser = (id) => {
-    setUsers(users.filter((user) => user.id !== id));
+  const handleDeleteUser = async (id) => {
+    const deleted = deleteSpecificUser(id);
+    toast.promise(deleted, {
+      loading: "loading",
+      success: "User deleted Successfully",
+      error: "Couldnot delete the user",
+    });
   };
 
   // Check if province already has a province user
@@ -546,7 +547,7 @@ const SuperAdmin = () => {
                           Edit
                         </button>
                         <button
-                          onClick={() => handleDeleteUser(user.id)}
+                          onClick={() => handleDeleteUser(user._id)}
                           className="text-red-600 hover:text-red-900"
                         >
                           Delete

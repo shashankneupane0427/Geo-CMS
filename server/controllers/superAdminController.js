@@ -27,3 +27,15 @@ export const getAllData = AsyncError(async (req, res, next) => {
     },
   });
 });
+
+export const deleteUserData = AsyncError(async (req, res, next) => {
+  const id = req.params.id;
+  const userExists = await user.findByIdAndDelete(id);
+  if (!userExists) {
+    return next(new HttpError(404, "Didnot found user of the Id provided"));
+  }
+  return res.status(200).json({
+    status: "success",
+    message: "User deleted Successfully",
+  });
+});

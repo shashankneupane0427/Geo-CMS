@@ -10,3 +10,4 @@ const base = axios.create({
 export const getAllPlaces = () => base.get("/generalUsers/places");
 export const login = (data) => base.post("/authorities/login", data);
 export const getAllSuperAdminData = () => base.get("/superadmin/allData");
+export const deleteSpecificUser = (id) => base.delete(`/superAdmin/user/${id}`);
