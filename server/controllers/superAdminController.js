@@ -8,7 +8,7 @@ export const getAllUsers = AsyncError(async (req, res, next) => {
   if (loggedInuser.role !== "admin") {
     return next(new HttpError(401, "No Acess"));
   }
-  const allUsers = await user.find();
+  const allUsers = await user.find().select("-password");
   return res.status(200).json({
     status: "success",
     data: allUsers,
