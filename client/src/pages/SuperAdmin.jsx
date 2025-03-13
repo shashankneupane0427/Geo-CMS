@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { getAllSuperAdminData } from "../../utils/Api";
 
 const SuperAdmin = () => {
   // Tab state management
@@ -107,7 +108,6 @@ const SuperAdmin = () => {
 
   // New user template
   const newUserTemplate = {
-    id: null,
     email: "",
     password: "",
     role: "District User",
@@ -115,51 +115,27 @@ const SuperAdmin = () => {
     districts: [],
   };
 
-  // Dummy user data with districts array and password field
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      email: "admin@geo.com",
-      password: "admin123",
-      role: "Admin",
-      province: "N/A",
-      districts: [],
-    },
-    {
-      id: 2,
-      email: "editor@geo.com",
-      password: "editor123",
-      role: "Province User",
-      province: "Bagmati Province",
-      districts: [],
-    },
-    {
-      id: 3,
-      email: "user1@geo.com",
-      password: "user123",
-      role: "District User",
-      province: "Bagmati Province",
-      districts: ["Kathmandu", "Lalitpur"],
-    },
-    {
-      id: 4,
-      email: "user2@geo.com",
-      password: "user456",
-      role: "District User",
-      province: "Gandaki Province",
-      districts: ["Kaski"],
-    },
-    {
-      id: 5,
-      email: "manager@geo.com",
-      password: "manager123",
-      role: "Province User",
-      province: "Province 1",
-      districts: [],
-    },
-  ]);
+  const [users, setUsers] = useState(null);
 
-  // Initial place template for adding new location
+  const [places, setPlaces] = useState(null);
+
+  useEffect(() => {
+    const sendRequest = async () => {
+      const response = await getAllSuperAdminData();
+      console.log("sending request to backend");
+      console.log(response.data.data.users);
+      setUsers(response.data.data.users);
+      setPlaces(response.data.data.places);
+    };
+    console.log("calling the function");
+    sendRequest();
+  }, []);
+
+  useEffect(() => {
+    console.log("users are", users);
+    console.log("places are", places);
+  }, [users, places]);
+
   const newPlaceTemplate = {
     id: null,
     title: "",
@@ -172,55 +148,8 @@ const SuperAdmin = () => {
     description: "",
     images: [],
   };
-
-  // Dummy place data
-  const [places, setPlaces] = useState([
-    {
-      id: 1,
-      title: "Taplejung",
-      location: {
-        latitude: "27.3538",
-        longitude: "87.6698",
-      },
-      district: "Taplejung",
-      province: "Province 1",
-      description: "Eastern mountain district of Nepal",
-      images: [
-        "https://res.cloudinary.com/demo/image/upload/v1613720013/samples/landscapes/nature-mountains.jpg",
-      ],
-    },
-    {
-      id: 2,
-      title: "Kathmandu",
-      location: {
-        latitude: "27.7172",
-        longitude: "85.3240",
-      },
-      district: "Kathmandu",
-      province: "Bagmati Province",
-      description: "Capital city of Nepal",
-      images: [
-        "https://res.cloudinary.com/demo/image/upload/v1582115272/samples/landscapes/architecture-signs.jpg",
-      ],
-    },
-    {
-      id: 3,
-      title: "Pokhara",
-      location: {
-        latitude: "28.2096",
-        longitude: "83.9856",
-      },
-      district: "Kaski",
-      province: "Gandaki Province",
-      description: "Tourist destination known for lakes and mountains",
-      images: [
-        "https://res.cloudinary.com/demo/image/upload/v1613720013/samples/landscapes/beach-boat.jpg",
-      ],
-    },
-  ]);
-
   // User role counts for stats
-  const roleStats = users.reduce((stats, user) => {
+  const roleStats = users?.reduce((stats, user) => {
     stats[user.role] = (stats[user.role] || 0) + 1;
     return stats;
   }, {});
@@ -520,12 +449,12 @@ const SuperAdmin = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-white p-6 rounded-lg shadow-md">
                 <h3 className="text-lg font-medium mb-2">Places</h3>
-                <p className="text-3xl font-bold">{places.length}</p>
+                <p className="text-3xl font-bold">{places?.length}</p>
                 <p className="text-sm text-gray-500 mt-2">Total locations</p>
               </div>
               <div className="bg-white p-6 rounded-lg shadow-md">
                 <h3 className="text-lg font-medium mb-2">Users</h3>
-                <p className="text-3xl font-bold">{users.length}</p>
+                <p className="text-3xl font-bold">{users?.length}</p>
                 <p className="text-sm text-gray-500 mt-2">Total users</p>
               </div>
               <div className="bg-white p-6 rounded-lg shadow-md">
@@ -541,13 +470,14 @@ const SuperAdmin = () => {
               <h3 className="text-lg font-medium mb-4">User Distribution</h3>
               <div className="bg-white p-6 rounded-lg shadow-md">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {Object.entries(roleStats).map(([role, count]) => (
-                    <div key={role} className="flex items-center">
-                      <div className="h-4 w-4 rounded-full bg-blue-500 mr-2"></div>
-                      <span className="text-sm">{role}: </span>
-                      <span className="text-sm font-bold ml-1">{count}</span>
-                    </div>
-                  ))}
+                  {roleStats &&
+                    Object.entries(roleStats).map(([role, count]) => (
+                      <div key={role} className="flex items-center">
+                        <div className="h-4 w-4 rounded-full bg-blue-500 mr-2"></div>
+                        <span className="text-sm">{role}: </span>
+                        <span className="text-sm font-bold ml-1">{count}</span>
+                      </div>
+                    ))}
                 </div>
               </div>
             </div>
@@ -589,7 +519,7 @@ const SuperAdmin = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {users.map((user) => (
-                    <tr key={user.id}>
+                    <tr key={user._id}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
                           {user.email}
@@ -605,7 +535,7 @@ const SuperAdmin = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-500">
-                          {user.districts.join(", ")}
+                          {user.district.join(" ,")}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -645,7 +575,7 @@ const SuperAdmin = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {places.map((place) => (
                 <div
-                  key={place.id}
+                  key={place._id}
                   className="bg-white rounded-lg shadow-md overflow-hidden"
                 >
                   <div className="relative h-48">

@@ -9,19 +9,39 @@ configDotenv();
 const app = express();
 const userHaru = [
   {
-    email: "district",
-    password: "district",
-    role: "district",
-  },
-  {
-    email: "province",
-    password: "province",
-    role: "province",
-  },
-  {
-    email: "admin@gmail.com",
-    password: "admin",
+    email: "admin@geo.com",
+    password: "admin123",
     role: "admin",
+    province: "N/A",
+    district: [],
+  },
+  {
+    email: "editor@geo.com",
+    password: "editor123",
+    role: "Province User",
+    province: "Bagmati Province",
+    district: [],
+  },
+  {
+    email: "user1@geo.com",
+    password: "user123",
+    role: "District User",
+    province: "Bagmati Province",
+    district: ["Kathmandu", "Lalitpur"],
+  },
+  {
+    email: "user2@geo.com",
+    password: "user456",
+    role: "District User",
+    province: "Gandaki Province",
+    district: ["Kaski"],
+  },
+  {
+    email: "manager@geo.com",
+    password: "manager123",
+    role: "Province User",
+    province: "Province 1",
+    district: [],
   },
 ];
 await mongoose
@@ -37,6 +57,7 @@ const seed = async () => {
     console.log(".........");
     console.log("seeding new data on the places collection");
     await place.insertMany(nepaliDistricts);
+    await user.deleteMany();
     await user.insertMany(userHaru);
     console.log("data seeded successfully");
   } catch (err) {

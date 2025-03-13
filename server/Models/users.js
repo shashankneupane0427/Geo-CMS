@@ -11,9 +11,11 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["admin", "province", "district"],
+    enum: ["admin", "Province User", "District User"],
     required: true,
   },
+  district: [String],
+  province: String,
 });
 
 const user = mongoose.model("users", userSchema);
