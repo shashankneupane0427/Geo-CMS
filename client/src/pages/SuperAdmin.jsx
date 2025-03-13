@@ -5,46 +5,159 @@ const SuperAdmin = () => {
   const [activeTab, setActiveTab] = useState("users");
   const [editingPlace, setEditingPlace] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [isAddingUser, setIsAddingUser] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const fileInputRef = useRef(null);
 
-  // Dummy user data with district and province fields
-  const users = [
+  // Nepal provinces and districts data
+  const nepalData = {
+    "Province 1": [
+      "Bhojpur",
+      "Dhankuta",
+      "Ilam",
+      "Jhapa",
+      "Khotang",
+      "Morang",
+      "Okhaldhunga",
+      "Panchthar",
+      "Sankhuwasabha",
+      "Solukhumbu",
+      "Sunsari",
+      "Taplejung",
+      "Terhathum",
+      "Udayapur",
+    ],
+    "Madhesh Province": [
+      "Bara",
+      "Dhanusha",
+      "Mahottari",
+      "Parsa",
+      "Rautahat",
+      "Saptari",
+      "Sarlahi",
+      "Siraha",
+    ],
+    "Bagmati Province": [
+      "Bhaktapur",
+      "Chitwan",
+      "Dhading",
+      "Dolakha",
+      "Kathmandu",
+      "Kavrepalanchok",
+      "Lalitpur",
+      "Makwanpur",
+      "Nuwakot",
+      "Ramechhap",
+      "Rasuwa",
+      "Sindhuli",
+      "Sindhupalchok",
+    ],
+    "Gandaki Province": [
+      "Baglung",
+      "Gorkha",
+      "Kaski",
+      "Lamjung",
+      "Manang",
+      "Mustang",
+      "Myagdi",
+      "Nawalparasi East",
+      "Parbat",
+      "Syangja",
+      "Tanahu",
+    ],
+    "Lumbini Province": [
+      "Arghakhanchi",
+      "Banke",
+      "Bardiya",
+      "Dang",
+      "Gulmi",
+      "Kapilvastu",
+      "Nawalparasi West",
+      "Palpa",
+      "Pyuthan",
+      "Rolpa",
+      "Rupandehi",
+      "Rukum East",
+    ],
+    "Karnali Province": [
+      "Dailekh",
+      "Dolpa",
+      "Humla",
+      "Jajarkot",
+      "Jumla",
+      "Kalikot",
+      "Mugu",
+      "Rukum West",
+      "Salyan",
+      "Surkhet",
+    ],
+    "Sudurpashchim Province": [
+      "Achham",
+      "Baitadi",
+      "Bajhang",
+      "Bajura",
+      "Dadeldhura",
+      "Darchula",
+      "Doti",
+      "Kailali",
+      "Kanchanpur",
+    ],
+  };
+
+  // New user template
+  const newUserTemplate = {
+    id: null,
+    email: "",
+    password: "",
+    role: "District User",
+    province: "",
+    districts: [],
+  };
+
+  // Dummy user data with districts array and password field
+  const [users, setUsers] = useState([
     {
       id: 1,
       email: "admin@geo.com",
+      password: "admin123",
       role: "Admin",
-      district: "N/A",
       province: "N/A",
+      districts: [],
     },
     {
       id: 2,
       email: "editor@geo.com",
+      password: "editor123",
       role: "Province User",
-      district: "N/A",
       province: "Bagmati Province",
+      districts: [],
     },
     {
       id: 3,
       email: "user1@geo.com",
+      password: "user123",
       role: "District User",
-      district: "Kathmandu",
       province: "Bagmati Province",
+      districts: ["Kathmandu", "Lalitpur"],
     },
     {
       id: 4,
       email: "user2@geo.com",
+      password: "user456",
       role: "District User",
-      district: "Pokhara",
       province: "Gandaki Province",
+      districts: ["Kaski"],
     },
     {
       id: 5,
       email: "manager@geo.com",
+      password: "manager123",
       role: "Province User",
-      district: "N/A",
       province: "Province 1",
+      districts: [],
     },
-  ];
+  ]);
 
   // Initial place template for adding new location
   const newPlaceTemplate = {
@@ -141,6 +254,52 @@ const SuperAdmin = () => {
     });
   };
 
+  // Handle user edit
+  const handleEditUser = (user) => {
+    setEditingUser({ ...user });
+    setIsAddingUser(false);
+    setActiveTab("editUser");
+  };
+
+  // Handle add new user
+  const handleAddUser = () => {
+    setEditingUser({ ...newUserTemplate, id: users.length + 1 });
+    setIsAddingUser(true);
+    setActiveTab("editUser");
+  };
+
+  // Handle user delete
+  const handleDeleteUser = (id) => {
+    setUsers(users.filter((user) => user.id !== id));
+  };
+
+  // Check if province already has a province user
+  const isProvinceAssigned = (province, userId = null) => {
+    return users.some(
+      (user) =>
+        user.role === "Province User" &&
+        user.province === province &&
+        (userId === null || user.id !== userId)
+    );
+  };
+
+  // Handle district selection
+  const handleDistrictSelection = (district) => {
+    if (editingUser.districts.includes(district)) {
+      // Remove district if already selected
+      setEditingUser({
+        ...editingUser,
+        districts: editingUser.districts.filter((d) => d !== district),
+      });
+    } else {
+      // Add district if not already selected
+      setEditingUser({
+        ...editingUser,
+        districts: [...editingUser.districts, district],
+      });
+    }
+  };
+
   // Handle file selection from device
   const handleFileSelect = (e) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -181,6 +340,26 @@ const SuperAdmin = () => {
     }
   };
 
+  // Handle image upload
+  const handleImageUpload = () => {
+    // Simulate Cloudinary upload by adding a demo image
+    const demoImages = [
+      "https://res.cloudinary.com/demo/image/upload/v1613720013/samples/landscapes/nature-mountains.jpg",
+      "https://res.cloudinary.com/demo/image/upload/v1582115272/samples/landscapes/architecture-signs.jpg",
+      "https://res.cloudinary.com/demo/image/upload/v1613720013/samples/landscapes/beach-boat.jpg",
+      "https://res.cloudinary.com/demo/image/upload/v1573055869/samples/landscapes/girl-urban-view.jpg",
+      "https://res.cloudinary.com/demo/image/upload/v1572271059/samples/landscapes/nature-mountain.jpg",
+    ];
+
+    const randomImage =
+      demoImages[Math.floor(Math.random() * demoImages.length)];
+
+    setEditingPlace({
+      ...editingPlace,
+      images: [...editingPlace.images, randomImage],
+    });
+  };
+
   // Handle place update or add
   const handleSavePlace = () => {
     if (isAdding) {
@@ -199,7 +378,23 @@ const SuperAdmin = () => {
     setActiveTab("places");
   };
 
-  // Handle form field changes
+  // Handle user update or add
+  const handleSaveUser = () => {
+    if (isAddingUser) {
+      // Add new user
+      setUsers([...users, editingUser]);
+    } else {
+      // Update existing user
+      setUsers(
+        users.map((user) => (user.id === editingUser.id ? editingUser : user))
+      );
+    }
+    setEditingUser(null);
+    setIsAddingUser(false);
+    setActiveTab("users");
+  };
+
+  // Handle form field changes for places
   const handleFieldChange = (field, value) => {
     if (field.includes(".")) {
       const [parent, child] = field.split(".");
@@ -218,6 +413,31 @@ const SuperAdmin = () => {
     }
   };
 
+  // Handle form field changes for users
+  const handleUserFieldChange = (field, value) => {
+    // Special handling for role changes
+    if (field === "role") {
+      let updatedUser = { ...editingUser, [field]: value };
+
+      // Reset districts if changing to Province User or Admin
+      if (value === "Province User" || value === "Admin") {
+        updatedUser.districts = [];
+      }
+
+      // Reset province if changing to Admin
+      if (value === "Admin") {
+        updatedUser.province = "N/A";
+      }
+
+      setEditingUser(updatedUser);
+    } else {
+      setEditingUser({
+        ...editingUser,
+        [field]: value,
+      });
+    }
+  };
+
   // Handle sign out
   const handleSignOut = () => {
     // In a real app, this would handle logout logic
@@ -226,70 +446,41 @@ const SuperAdmin = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-100 overflow-hidden">
       {/* Sidebar */}
       <div className="w-64 bg-gray-200 flex flex-col">
         <div className="p-6">
           <h1 className="text-2xl font-bold">Dashboard</h1>
         </div>
-        <nav className="mt-6 flex-grow">
-          <div
-            className={`px-6 py-3 cursor-pointer ${
-              activeTab === "users" ? "bg-gray-300" : "hover:bg-gray-200"
+        <div className="mt-4">
+          <button
+            onClick={() => setActiveTab("dashboard")}
+            className={`w-full text-left py-2 px-6 ${
+              activeTab === "dashboard" ? "bg-gray-300 font-medium" : ""
             }`}
+          >
+            Dashboard
+          </button>
+          <button
             onClick={() => setActiveTab("users")}
-          >
-            <span className="flex items-center">
-              <svg
-                className="h-5 w-5 mr-3"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
-              User Management
-            </span>
-          </div>
-          <div
-            className={`px-6 py-3 cursor-pointer ${
-              activeTab === "places" || activeTab === "editPlace"
-                ? "bg-gray-300"
-                : "hover:bg-gray-200"
+            className={`w-full text-left py-2 px-6 ${
+              activeTab === "users" ? "bg-gray-300 font-medium" : ""
             }`}
-            onClick={() => setActiveTab("places")}
           >
-            <span className="flex items-center">
-              <svg
-                className="h-5 w-5 mr-3"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-              Location Management
-            </span>
-          </div>
-        </nav>
-        <div className="p-6 border-t border-gray-300">
-          <div className="flex items-center mb-4">
+            User Management
+          </button>
+          <button
+            onClick={() => setActiveTab("places")}
+            className={`w-full text-left py-2 px-6 ${
+              activeTab === "places" ? "bg-gray-300 font-medium" : ""
+            }`}
+          >
+            Place Management
+          </button>
+        </div>
+        <div className="mt-auto p-6">
+          {/* Moved user profile to top */}
+          <div className="flex items-center mt-4 mb-4">
             <div className="h-10 w-10 rounded-full bg-red-400 flex items-center justify-center">
               <span className="text-xl font-bold text-white">A</span>
             </div>
@@ -300,7 +491,7 @@ const SuperAdmin = () => {
           </div>
           <button
             onClick={handleSignOut}
-            className="w-full bg-black text-white py-2 px-4 rounded-md hover:bg-red-600 flex items-center justify-center"
+            className="w-full bg-black text-white py-2 px-4 rounded-md hover:bg-red-600 flex items-center justify-center mt-2"
           >
             <svg
               className="h-5 w-5 mr-2"
@@ -321,125 +512,157 @@ const SuperAdmin = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto">
-        {activeTab === "users" && (
-          <div className="p-8">
-            <h2 className="text-2xl font-bold mb-6">User Management</h2>
-
-            {/* User Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center">
-                  <div className="p-3 rounded-full bg-indigo-100 text-indigo-500">
-                    <svg
-                      className="h-8 w-8"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                      />
-                    </svg>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-gray-500">Total Users</p>
-                    <p className="text-2xl font-bold">{users.length}</p>
-                  </div>
-                </div>
+      <div className="flex-1 overflow-y-auto p-6">
+        {/* Dashboard */}
+        {activeTab === "dashboard" && (
+          <div>
+            <h2 className="text-2xl font-bold mb-6">Dashboard Overview</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <h3 className="text-lg font-medium mb-2">Places</h3>
+                <p className="text-3xl font-bold">{places.length}</p>
+                <p className="text-sm text-gray-500 mt-2">Total locations</p>
               </div>
-
-              {Object.entries(roleStats).map(([role, count], index) => (
-                <div key={index} className="bg-white rounded-lg shadow p-6">
-                  <div className="flex items-center">
-                    <div
-                      className={`p-3 rounded-full ${
-                        role === "Admin"
-                          ? "bg-red-100 text-red-500"
-                          : role === "Province User"
-                          ? "bg-green-100 text-green-500"
-                          : role === "District User"
-                          ? "bg-yellow-100 text-yellow-500"
-                          : "bg-blue-100 text-blue-500"
-                      }`}
-                    >
-                      <svg
-                        className="h-8 w-8"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                        />
-                      </svg>
-                    </div>
-                    <div className="ml-4">
-                      <p className="text-gray-500">{role}s</p>
-                      <p className="text-2xl font-bold">{count}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <h3 className="text-lg font-medium mb-2">Users</h3>
+                <p className="text-3xl font-bold">{users.length}</p>
+                <p className="text-sm text-gray-500 mt-2">Total users</p>
+              </div>
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <h3 className="text-lg font-medium mb-2">Districts</h3>
+                <p className="text-3xl font-bold">
+                  {Object.values(nepalData).flat().length}
+                </p>
+                <p className="text-sm text-gray-500 mt-2">Total districts</p>
+              </div>
             </div>
 
-            {/* User Table */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="mt-6">
+              <h3 className="text-lg font-medium mb-4">User Distribution</h3>
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {Object.entries(roleStats).map(([role, count]) => (
+                    <div key={role} className="flex items-center">
+                      <div className="h-4 w-4 rounded-full bg-blue-500 mr-2"></div>
+                      <span className="text-sm">{role}: </span>
+                      <span className="text-sm font-bold ml-1">{count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <h3 className="text-lg font-medium mb-4">Recent Places</h3>
+              <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                <table className="min-w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Name
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        District
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Province
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {places.slice(0, 3).map((place) => (
+                      <tr key={place.id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            {place.title}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-500">
+                            {place.district}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-500">
+                            {place.province}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* User Management */}
+        {activeTab === "users" && (
+          <div>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">User Management</h2>
+              <button
+                onClick={handleAddUser}
+                className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
+              >
+                Add New User
+              </button>
+            </div>
+            <div className="bg-white rounded-lg shadow-md overflow-hidden">
               <table className="min-w-full">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      ID
-                    </th>
-                    <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Email
                     </th>
-                    <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Role
                     </th>
-                    <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      District
-                    </th>
-                    <th className="py-3 px-6 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Province
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Districts
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-gray-200">
                   {users.map((user) => (
-                    <tr key={user.id} className="hover:bg-gray-50">
-                      <td className="py-4 px-6 text-sm font-medium text-gray-900">
-                        {user.id}
+                    <tr key={user.id}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">
+                          {user.email}
+                        </div>
                       </td>
-                      <td className="py-4 px-6 text-sm text-gray-500">
-                        {user.email}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500">{user.role}</div>
                       </td>
-                      <td className="py-4 px-6 text-sm text-gray-500">
-                        <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            user.role === "Admin"
-                              ? "bg-red-100 text-red-800"
-                              : user.role === "Province User"
-                              ? "bg-green-100 text-green-800"
-                              : user.role === "District User"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-blue-100 text-blue-800"
-                          }`}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500">
+                          {user.province}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-500">
+                          {user.districts.join(", ")}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button
+                          onClick={() => handleEditUser(user)}
+                          className="text-blue-600 hover:text-blue-900 mr-4"
                         >
-                          {user.role}
-                        </span>
-                      </td>
-                      <td className="py-4 px-6 text-sm text-gray-500">
-                        {user.district}
-                      </td>
-                      <td className="py-4 px-6 text-sm text-gray-500">
-                        {user.province}
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(user.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          Delete
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -449,76 +672,51 @@ const SuperAdmin = () => {
           </div>
         )}
 
+        {/* Place Management */}
         {activeTab === "places" && (
-          <div className="p-8">
+          <div>
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">Location Management</h2>
+              <h2 className="text-2xl font-bold">Place Management</h2>
               <button
                 onClick={handleAddPlace}
-                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center"
+                className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
               >
-                <svg
-                  className="h-5 w-5 mr-2"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                  />
-                </svg>
-                Add Location
+                Add New Place
               </button>
             </div>
-
-            {/* Places Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {places.map((place) => (
                 <div
                   key={place.id}
-                  className="bg-white rounded-lg shadow overflow-hidden"
+                  className="bg-white rounded-lg shadow-md overflow-hidden"
                 >
-                  {place.images && place.images.length > 0 && (
-                    <div className="h-48 overflow-hidden">
-                      <img
-                        src={place.images[0]}
-                        alt={place.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  )}
-                  <div className="p-6">
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">
-                      {place.title}
-                    </h3>
-                    <div className="mb-4">
-                      <span className="px-2 py-1 text-xs font-semibold rounded bg-indigo-100 text-indigo-800 mr-2">
-                        {place.district}
-                      </span>
-                      <span className="px-2 py-1 text-xs font-semibold rounded bg-purple-100 text-purple-800">
-                        {place.province}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-4">
+                  <div className="relative h-48">
+                    <img
+                      src={
+                        place.images[0] || "https://via.placeholder.com/400x200"
+                      }
+                      alt={place.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-lg font-medium">{place.title}</h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {place.district}, {place.province}
+                    </p>
+                    <p className="text-sm mt-2 line-clamp-2">
                       {place.description}
                     </p>
-                    <div className="text-sm text-gray-500 mb-4">
-                      <p>Latitude: {place.location.latitude}</p>
-                      <p>Longitude: {place.location.longitude}</p>
-                    </div>
-                    <div className="flex justify-end">
+                    <div className="flex justify-between mt-4">
                       <button
                         onClick={() => handleEditPlace(place)}
-                        className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 mr-2"
+                        className="text-blue-600 hover:text-blue-900"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDeletePlace(place.id)}
-                        className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                        className="text-red-600 hover:text-red-900"
                       >
                         Delete
                       </button>
@@ -530,83 +728,78 @@ const SuperAdmin = () => {
           </div>
         )}
 
+        {/* Edit Place */}
         {activeTab === "editPlace" && editingPlace && (
-          <div className="p-8">
-            <div className="flex items-center mb-6">
+          <div>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">
+                {isAdding ? "Add New Place" : "Edit Place"}
+              </h2>
               <button
                 onClick={() => {
-                  setActiveTab("places");
                   setEditingPlace(null);
-                  setIsAdding(false);
+                  setActiveTab("places");
                 }}
-                className="mr-4"
+                className="text-gray-600 hover:text-gray-900"
               >
-                <svg
-                  className="h-6 w-6 text-gray-500"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                  />
-                </svg>
+                Cancel
               </button>
-              <h2 className="text-2xl font-bold">
-                {isAdding ? "Add New Location" : "Edit Location"}
-              </h2>
             </div>
-
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Title
                   </label>
                   <input
                     type="text"
                     value={editingPlace.title}
                     onChange={(e) => handleFieldChange("title", e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholder="Enter location title"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    District
-                  </label>
-                  <input
-                    type="text"
-                    value={editingPlace.district}
-                    onChange={(e) =>
-                      handleFieldChange("district", e.target.value)
-                    }
-                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholder="Enter district name"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Province
                   </label>
-                  <input
-                    type="text"
+                  <select
                     value={editingPlace.province}
                     onChange={(e) =>
                       handleFieldChange("province", e.target.value)
                     }
-                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholder="Enter province name"
-                  />
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select Province</option>
+                    {Object.keys(nepalData).map((province) => (
+                      <option key={province} value={province}>
+                        {province}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    District
+                  </label>
+                  <select
+                    value={editingPlace.district}
+                    onChange={(e) =>
+                      handleFieldChange("district", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    disabled={!editingPlace.province}
+                  >
+                    <option value="">Select District</option>
+                    {editingPlace.province &&
+                      nepalData[editingPlace.province].map((district) => (
+                        <option key={district} value={district}>
+                          {district}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Latitude
                   </label>
                   <input
@@ -615,150 +808,238 @@ const SuperAdmin = () => {
                     onChange={(e) =>
                       handleFieldChange("location.latitude", e.target.value)
                     }
-                    className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholder="e.g. 27.3538"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-              </div>
-
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Longitude
-                </label>
-                <input
-                  type="text"
-                  value={editingPlace.location.longitude}
-                  onChange={(e) =>
-                    handleFieldChange("location.longitude", e.target.value)
-                  }
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="e.g. 87.6698"
-                />
-              </div>
-
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description
-                </label>
-                <textarea
-                  value={editingPlace.description}
-                  onChange={(e) =>
-                    handleFieldChange("description", e.target.value)
-                  }
-                  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  rows="4"
-                  placeholder="Enter location description"
-                ></textarea>
-              </div>
-
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Images
-                </label>
-                <div className="flex items-center mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Longitude
+                  </label>
                   <input
-                    type="file"
-                    ref={fileInputRef}
-                    className="hidden"
-                    accept="image/*"
-                    multiple
-                    onChange={handleFileSelect}
+                    type="text"
+                    value={editingPlace.location.longitude}
+                    onChange={(e) =>
+                      handleFieldChange("location.longitude", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  <button
-                    onClick={() => fileInputRef.current.click()}
-                    className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 flex items-center mr-3"
-                  >
-                    <svg
-                      className="h-5 w-5 mr-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
-                    </svg>
-                    Select Images from Device
-                  </button>
-                  <button
-                    onClick={() => handleImageUpload()}
-                    className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 flex items-center"
-                  >
-                    <svg
-                      className="h-5 w-5 mr-2"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                      />
-                    </svg>
-                    Demo Upload to Cloudinary
-                  </button>
-                  <p className="ml-3 text-sm text-gray-500">
-                    {editingPlace.images && editingPlace.images.length > 0
-                      ? `${editingPlace.images.length} image(s) uploaded`
-                      : "No images uploaded yet"}
-                  </p>
                 </div>
-
-                {/* Image Gallery */}
-                {editingPlace.images && editingPlace.images.length > 0 && (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {editingPlace.images.map((img, index) => (
-                      <div key={index} className="relative group">
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    value={editingPlace.description}
+                    onChange={(e) =>
+                      handleFieldChange("description", e.target.value)
+                    }
+                    rows="4"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  ></textarea>
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Images
+                  </label>
+                  <div className="flex flex-wrap gap-4 mb-4">
+                    {editingPlace.images.map((image, index) => (
+                      <div key={index} className="relative">
                         <img
-                          src={img}
+                          src={image}
                           alt={`Image ${index + 1}`}
-                          className="w-full h-24 object-cover rounded-md"
+                          className="h-24 w-24 object-cover rounded-md"
                         />
                         <button
                           onClick={() => handleDeleteImage(index)}
-                          className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center"
                         >
-                          <svg
-                            className="h-4 w-4"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
+                          ×
                         </button>
                       </div>
                     ))}
                   </div>
-                )}
-              </div>
 
-              <div className="flex justify-end">
-                <button
-                  onClick={() => {
-                    setActiveTab("places");
-                    setEditingPlace(null);
-                    setIsAdding(false);
-                  }}
-                  className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mr-2"
-                >
-                  Cancel
-                </button>
+                  <div className="flex items-center">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileSelect}
+                      className="hidden"
+                      multiple
+                    />
+                    <button
+                      onClick={() => fileInputRef.current.click()}
+                      className="bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 mr-2"
+                    >
+                      Select Files
+                    </button>
+                    <button
+                      onClick={handleImageUpload}
+                      className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
+                    >
+                      Upload Demo Image
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 flex justify-end">
                 <button
                   onClick={handleSavePlace}
-                  className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                  className="bg-blue-500 text-white py-2 px-6 rounded-md hover:bg-blue-600"
                 >
-                  {isAdding ? "Add Location" : "Save Changes"}
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit User */}
+        {activeTab === "editUser" && editingUser && (
+          <div>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">
+                {isAddingUser ? "Add New User" : "Edit User"}
+              </h2>
+              <button
+                onClick={() => {
+                  setEditingUser(null);
+                  setActiveTab("users");
+                }}
+                className="text-gray-600 hover:text-gray-900"
+              >
+                Cancel
+              </button>
+            </div>
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={editingUser.email}
+                    onChange={(e) =>
+                      handleUserFieldChange("email", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={editingUser.password}
+                      onChange={(e) =>
+                        handleUserFieldChange("password", e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    >
+                      {showPassword ? "Hide" : "Show"}
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Role
+                  </label>
+                  <select
+                    value={editingUser.role}
+                    onChange={(e) =>
+                      handleUserFieldChange("role", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="Admin">Admin</option>
+                    <option value="Province User">Province User</option>
+                    <option value="District User">District User</option>
+                  </select>
+                </div>
+                {editingUser.role !== "Admin" && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Province
+                    </label>
+                    <select
+                      value={editingUser.province}
+                      onChange={(e) =>
+                        handleUserFieldChange("province", e.target.value)
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select Province</option>
+                      {Object.keys(nepalData).map((province) => (
+                        <option
+                          key={province}
+                          value={province}
+                          disabled={
+                            editingUser.role === "Province User" &&
+                            isProvinceAssigned(province, editingUser.id)
+                          }
+                        >
+                          {province}{" "}
+                          {editingUser.role === "Province User" &&
+                          isProvinceAssigned(province, editingUser.id)
+                            ? "(Already assigned)"
+                            : ""}
+                        </option>
+                      ))}
+                    </select>
+                    {editingUser.role === "Province User" && (
+                      <p className="mt-1 text-sm text-gray-500">
+                        Note: Each province can have only one Province User
+                      </p>
+                    )}
+                  </div>
+                )}
+                {editingUser.role === "District User" &&
+                  editingUser.province && (
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Districts
+                      </label>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                        {nepalData[editingUser.province].map((district) => (
+                          <div key={district} className="flex items-center">
+                            <input
+                              type="checkbox"
+                              id={`district-${district}`}
+                              checked={editingUser.districts.includes(district)}
+                              onChange={() => handleDistrictSelection(district)}
+                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            />
+                            <label
+                              htmlFor={`district-${district}`}
+                              className="ml-2 text-sm text-gray-700"
+                            >
+                              {district}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+              </div>
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={handleSaveUser}
+                  className="bg-blue-500 text-white py-2 px-6 rounded-md hover:bg-blue-600"
+                  disabled={
+                    editingUser.role === "Province User" &&
+                    editingUser.province &&
+                    isProvinceAssigned(editingUser.province, editingUser.id)
+                  }
+                >
+                  Save
                 </button>
               </div>
             </div>
