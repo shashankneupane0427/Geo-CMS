@@ -2,7 +2,8 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { Icon } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet.awesome-markers";
-
+import { useEffect, useState } from "react";
+import { getAllPlaces } from "../utils/Api";
 const markers = [
   {
     geocode: [28.3949, 84.124], // Gandaki Province (Pokhara)
@@ -47,6 +48,18 @@ const markers = [
 ];
 
 function App() {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    const getPlace = async () => {
+      const response = await getAllPlaces();
+      setData(response.data.data);
+    };
+    getPlace();
+  }, []);
+  useEffect(() => {
+    console.log(data);
+  }, [data]);
   return (
     <>
       <MapContainer center={[28.3949, 84.124]} zoom={7}>
