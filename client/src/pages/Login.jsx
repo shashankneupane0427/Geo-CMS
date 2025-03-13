@@ -5,8 +5,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { setErrorMap, z } from "zod";
 import { login } from "../../utils/Api";
 import { toast } from "sonner";
+import { useAuth } from "../context/AuthorizationContext";
+import { jwtDecode } from "jwt-decode";
 
 const Login = () => {
+  const { loginForContext } = useAuth();
   const formSchema = z.object({
     email: z
       .string()
@@ -34,7 +37,10 @@ const Login = () => {
     try {
       const serverResponse = await login(data);
       setResponse(serverResponse);
+
       toast.success("Logged in successfully");
+
+      // login(response);
     } catch (err) {
       if (err.response) {
         setErrMsg(err.response.data.message);
@@ -43,6 +49,15 @@ const Login = () => {
       }
     }
   };
+  useEffect(() => {
+    if (response) {
+      const decode = jwtDecode(response.data.token);
+      loginForContext(response.data.token, decode);
+    }
+  }, [response]);
+  useEffect(() => {
+    console.log(response);
+  }, [response]);
 
   useEffect(() => {
     if (errMsg && errMsg.trim()) {
