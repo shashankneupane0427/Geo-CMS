@@ -3,6 +3,7 @@ import Layout from "./layout";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import { Toaster } from "sonner";
 
 function App() {
   return (
