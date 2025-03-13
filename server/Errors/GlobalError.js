@@ -6,8 +6,8 @@ const GlobalError = (error, req, res, next) => {
     error.status = "Error";
   }
   return res.status(Error.statusCode || 500).json({
-    status: error.status,
-    statusCode: error.statusCode,
+    status: error.status || "Error",
+    statusCode: error.statusCode || 500,
     message: error.message,
   });
 };

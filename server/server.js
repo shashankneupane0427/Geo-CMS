@@ -4,6 +4,7 @@ import { configDotenv } from "dotenv";
 import morgan from "morgan";
 import mongoose from "mongoose";
 import GlobalError from "./Errors/GlobalError.js";
+import userRoutes from "./routes/generalUsersRoute.js";
 
 configDotenv();
 const app = express();
@@ -14,6 +15,7 @@ mongoose
 
 app.use(morgan("dev"));
 app.use(bodyParser.json());
+app.use("/api/v1/generalUsers", userRoutes);
 
 app.use(GlobalError);
 app.listen(process.env.PORT_NUMBER, () => {
