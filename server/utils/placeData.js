@@ -63,7 +63,7 @@ const nepaliDistricts = [
     district: "Sunsari",
     province: "Province 1",
     description: "Eastern terai district of Nepal",
-    images: [],
+    images: ["https://thesandeshneupane.com/wp-content/uploads/2023/12/kavre.jpg"],
   },
   {
     title: "Dhankuta",
