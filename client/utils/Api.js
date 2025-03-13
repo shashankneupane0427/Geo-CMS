@@ -8,3 +8,4 @@ const base = axios.create({
 });
 
 export const getAllPlaces = () => base.get("/generalUsers/places");
+export const login = (data) => base.post("/authorities/login", data);

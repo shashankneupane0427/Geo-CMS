@@ -1,11 +1,15 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { setErrorMap, z } from "zod";
+import { login } from "../../utils/Api";
+import { toast } from "sonner";
+import { useAuth } from "../context/AuthorizationContext";
+import { jwtDecode } from "jwt-decode";
 
 const Login = () => {
-  // Form validation schema using Zod
+  const { loginForContext } = useAuth();
   const formSchema = z.object({
     email: z
       .string()
@@ -14,7 +18,9 @@ const Login = () => {
     password: z.string().min(1, "Password is required"),
   });
 
-  // React Hook Form with Zod resolver
+  const [response, setResponse] = useState(null);
+  const [errMsg, setErrMsg] = useState("");
+
   const {
     register,
     handleSubmit,
@@ -27,11 +33,38 @@ const Login = () => {
     },
   });
 
-  // Form submission handler
-  const onSubmit = (data) => {
-    console.log("Form submitted:", data);
-    // Here you would typically send the data to your backend for authentication
+  const onSubmit = async (data) => {
+    try {
+      const serverResponse = await login(data);
+      setResponse(serverResponse);
+
+      toast.success("Logged in successfully");
+
+      // login(response);
+    } catch (err) {
+      if (err.response) {
+        setErrMsg(err.response.data.message);
+      } else {
+        setErrMsg("something went wrong please try agian later!");
+      }
+    }
   };
+  useEffect(() => {
+    if (response) {
+      const decode = jwtDecode(response.data.token);
+      loginForContext(response.data.token, decode);
+    }
+  }, [response]);
+  useEffect(() => {
+    console.log(response);
+  }, [response]);
+
+  useEffect(() => {
+    if (errMsg && errMsg.trim()) {
+      toast.error(errMsg);
+      setErrMsg("");
+    }
+  }, [errMsg]);
 
   return (
     <div className="flex h-[80vh] bg-gray-50 pb-12">

@@ -19,7 +19,7 @@ const userHaru = [
     role: "province",
   },
   {
-    email: "admin",
+    email: "admin@gmail.com",
     password: "admin",
     role: "admin",
   },
