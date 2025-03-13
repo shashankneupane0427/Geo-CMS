@@ -1,5 +1,6 @@
 # GeoCMS
 
+<img src="/client/public/banner.png">
 GeoCMS is a map-based Content Management System (CMS) built using the MERN stack. It provides an interactive map where users can explore various locations marked with pins. Clicking on a marker reveals relevant information. The platform supports role-based authentication with different access levels for super admins, province users, and district users.
 
 ## Features
@@ -25,7 +26,8 @@ GeoCMS is a map-based Content Management System (CMS) built using the MERN stack
 
 ## Installation
 
-1. **Clone the repository**  
+1. **Clone the repository**
    ```bash
    git clone https://github.com/yourusername/GeoCMS.git
    cd GeoCMS
+   ```
