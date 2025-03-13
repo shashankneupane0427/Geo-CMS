@@ -60,6 +60,10 @@ function App() {
   useEffect(() => {
     console.log(data);
   }, [data]);
+  if (data === null || !data) {
+    return <>loading</>;
+  }
+
   return (
     <>
       <MapContainer center={[28.3949, 84.124]} zoom={7}>
@@ -68,9 +72,13 @@ function App() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {/* Mapping through the markers */}
-        {markers.map((marker, index) => (
-          <Marker key={index} position={marker.geocode}>
-            <Popup>{marker.popUp}</Popup>
+        {console.log(data[0].location)}
+        {data.map((place, index) => (
+          <Marker
+            key={index}
+            position={[place.location.latitude, place.location.longitude]}
+          >
+            {/* <Popup>{.popUp}</Popup> */}
           </Marker>
         ))}
       </MapContainer>
