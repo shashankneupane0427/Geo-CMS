@@ -5,6 +5,8 @@ import morgan from "morgan";
 import mongoose from "mongoose";
 import GlobalError from "./Errors/GlobalError.js";
 import userRoutes from "./routes/generalUsersRoute.js";
+import autheticationRoutes from "./routes/authenticationRoutes.js";
+import superAdmin from "./routes/superAdminRoutes.js";
 import cors from "cors";
 
 configDotenv();
@@ -22,6 +24,8 @@ app.use(
 );
 app.use(bodyParser.json());
 app.use("/api/v1/generalUsers", userRoutes);
+app.use("/api/v1/authorities", autheticationRoutes);
+app.use("/api/v1/superadmin", superAdmin);
 
 app.use(GlobalError);
 app.listen(process.env.PORT_NUMBER, () => {
