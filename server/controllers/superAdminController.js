@@ -39,3 +39,30 @@ export const deleteUserData = AsyncError(async (req, res, next) => {
     message: "User deleted Successfully",
   });
 });
+
+export const updateUserData = AsyncError(async (req, res, next) => {
+  const id = req.params.id;
+  let userExists = await user.findById(id);
+  if (!userExists) {
+    return next(new HttpError(404, "Didnot found user of the Id provided"));
+  }
+  Object.assign(userExists, req.body);
+  await userExists.save();
+
+  return res.status(200).json({
+    status: "success",
+    data: userExists,
+  });
+});
+
+export const addNewUser = AsyncError(async (req, res, next) => {
+  console.log(req.body);
+  const newUser = await user.create(req.body);
+  if (!newUser) {
+    return next(new HttpError(500, "cannot create a new user"));
+  }
+  return res.status(200).json({
+    status: "success",
+    data: newUser,
+  });
+});

@@ -1,5 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
-import { deleteSpecificUser, getAllSuperAdminData } from "../../utils/Api";
+import {
+  addNewUser,
+  deleteSpecificUser,
+  getAllSuperAdminData,
+  UpdateUserData,
+} from "../../utils/Api";
 import { toast } from "sonner";
 
 const SuperAdmin = () => {
@@ -215,17 +220,17 @@ const SuperAdmin = () => {
 
   // Handle district selection
   const handleDistrictSelection = (district) => {
-    if (editingUser.districts.includes(district)) {
+    if (editingUser.district.includes(district)) {
       // Remove district if already selected
       setEditingUser({
         ...editingUser,
-        districts: editingUser.districts.filter((d) => d !== district),
+        districts: editingUser.district.filter((d) => d !== district),
       });
     } else {
       // Add district if not already selected
       setEditingUser({
         ...editingUser,
-        districts: [...editingUser.districts, district],
+        districts: [...editingUser.district, district],
       });
     }
   };
@@ -309,15 +314,23 @@ const SuperAdmin = () => {
   };
 
   // Handle user update or add
-  const handleSaveUser = () => {
+  const handleSaveUser = async () => {
     if (isAddingUser) {
-      // Add new user
-      setUsers([...users, editingUser]);
+      console.log(editingUser);
+      const sendRequest = addNewUser(editingUser);
+      toast.promise(sendRequest, {
+        loading: "loading",
+        success: "Added the user Successfully",
+        error: "Coulnot add the user",
+      });
     } else {
-      // Update existing user
-      setUsers(
-        users.map((user) => (user.id === editingUser.id ? editingUser : user))
-      );
+      console.log("inside hanldesaveuser");
+      const sendRequest = UpdateUserData(editingUser._id, editingUser);
+      toast.promise(sendRequest, {
+        loading: "loading",
+        success: "Updated the user Successfully",
+        error: "Coulnot delete the user",
+      });
     }
     setEditingUser(null);
     setIsAddingUser(false);
@@ -347,7 +360,7 @@ const SuperAdmin = () => {
   const handleUserFieldChange = (field, value) => {
     // Special handling for role changes
     if (field === "role") {
-      let updatedUser = { ...editingUser, [field]: value };
+      let updatedUser = { ...editingUser, [field]: value.trim() };
 
       // Reset districts if changing to Province User or Admin
       if (value === "Province User" || value === "Admin") {
@@ -897,20 +910,24 @@ const SuperAdmin = () => {
                         Districts
                       </label>
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                        {nepalData[editingUser.province].map((district) => (
-                          <div key={district} className="flex items-center">
+                        {nepalData[editingUser.province].map((onedistrict) => (
+                          <div key={onedistrict} className="flex items-center">
                             <input
                               type="checkbox"
-                              id={`district-${district}`}
-                              checked={editingUser.districts.includes(district)}
-                              onChange={() => handleDistrictSelection(district)}
+                              id={`district-${onedistrict}`}
+                              checked={editingUser.district.includes(
+                                onedistrict
+                              )}
+                              onChange={() =>
+                                handleDistrictSelection(onedistrict)
+                              }
                               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                             />
                             <label
-                              htmlFor={`district-${district}`}
+                              htmlFor={`district-${onedistrict}`}
                               className="ml-2 text-sm text-gray-700"
                             >
-                              {district}
+                              {onedistrict}
                             </label>
                           </div>
                         ))}
@@ -920,7 +937,7 @@ const SuperAdmin = () => {
               </div>
               <div className="mt-6 flex justify-end">
                 <button
-                  onClick={handleSaveUser}
+                  onClick={() => handleSaveUser()}
                   className="bg-blue-500 text-white py-2 px-6 rounded-md hover:bg-blue-600"
                   disabled={
                     editingUser.role === "Province User" &&
