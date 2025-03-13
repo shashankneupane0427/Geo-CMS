@@ -108,7 +108,7 @@ function App() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-[90vh] bg-gray-50">
       {/* Main content */}
       <div className="flex-grow p-6">
         <div className="h-full w-full overflow-hidden">

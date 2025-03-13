@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 
 const SuperAdmin = () => {
   // Tab state management
-  const [activeTab, setActiveTab] = useState("users");
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [editingPlace, setEditingPlace] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -450,7 +450,7 @@ const SuperAdmin = () => {
       {/* Sidebar */}
       <div className="w-64 bg-gray-200 flex flex-col">
         <div className="p-6">
-          <h1 className="text-2xl font-bold">Dashboard</h1>
+          <h1 className="text-2xl font-bold">CMS</h1>
         </div>
         <div className="mt-4">
           <button
@@ -549,48 +549,6 @@ const SuperAdmin = () => {
                     </div>
                   ))}
                 </div>
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <h3 className="text-lg font-medium mb-4">Recent Places</h3>
-              <div className="bg-white rounded-lg shadow-md overflow-hidden">
-                <table className="min-w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Name
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        District
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Province
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {places.slice(0, 3).map((place) => (
-                      <tr key={place.id}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">
-                            {place.title}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-500">
-                            {place.district}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-500">
-                            {place.province}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
               </div>
             </div>
           </div>
