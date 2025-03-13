@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { setErrorMap, z } from "zod";
 import { login } from "../../utils/Api";
@@ -9,6 +9,7 @@ import { useAuth } from "../context/AuthorizationContext";
 import { jwtDecode } from "jwt-decode";
 
 const Login = () => {
+  const navigate = useNavigate();
   const { loginForContext } = useAuth();
   const formSchema = z.object({
     email: z
@@ -20,6 +21,15 @@ const Login = () => {
 
   const [response, setResponse] = useState(null);
   const [errMsg, setErrMsg] = useState("");
+  const redirectBasedOnRole = (role) => {
+    switch (role) {
+      case "admin":
+        navigate("/superadmin");
+        break;
+      default:
+        navigate("/");
+    }
+  };
 
   const {
     register,
@@ -39,6 +49,10 @@ const Login = () => {
       setResponse(serverResponse);
 
       toast.success("Logged in successfully");
+      const decode = jwtDecode(serverResponse.data.token);
+      loginForContext(serverResponse.data.token, decode);
+
+      redirectBasedOnRole(decode.role);
 
       // login(response);
     } catch (err) {
@@ -49,15 +63,6 @@ const Login = () => {
       }
     }
   };
-  useEffect(() => {
-    if (response) {
-      const decode = jwtDecode(response.data.token);
-      loginForContext(response.data.token, decode);
-    }
-  }, [response]);
-  useEffect(() => {
-    console.log(response);
-  }, [response]);
 
   useEffect(() => {
     if (errMsg && errMsg.trim()) {
