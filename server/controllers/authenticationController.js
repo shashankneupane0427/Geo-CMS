@@ -22,3 +22,17 @@ export const login = AsyncError(async (req, res, next) => {
     token,
   });
 });
+
+export const protect = AsyncError(async (req, res, next) => {
+  const token = req.headers.authorization;
+  if (!token) {
+    return next(new HttpError(401, "No token provided"));
+  }
+  const mainToken = token.split(" ")[1];
+  const decode = jwt.verify(mainToken, process.env.JWT_SECRET);
+  if (!decode) {
+    return next(new HttpError(401, "Unauthorized"));
+  }
+  req.user = decode;
+  next();
+});
