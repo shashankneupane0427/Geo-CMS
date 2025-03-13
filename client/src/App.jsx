@@ -9,6 +9,7 @@ import SuperAdmin from "./pages/SuperAdmin";
 import ProvinceUser from "./pages/ProvinceUser";
 import DistrictUser from "./pages/DistrictUser";
 import AuthorizationContext from "./context/AuthorizationContext";
+import PrivateRoute from "./pages/PrivateRoute";
 
 function App() {
   return (
@@ -19,10 +20,19 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/superadmin" element={<SuperAdmin />} />
+
+          <Route
+            path="/superadmin"
+            element={
+              <PrivateRoute>
+                <SuperAdmin></SuperAdmin>
+              </PrivateRoute>
+            }
+          />
+
           <Route path="/provinceuser" element={<ProvinceUser />} />
           <Route path="/districtuser" element={<DistrictUser />} />
-        </Route>
+        </Route>{" "}
       </Routes>
     </AuthorizationContext>
   );

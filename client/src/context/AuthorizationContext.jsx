@@ -8,10 +8,11 @@ function AuthorizationContext({ children }) {
 
   const loginForContext = (token, userData) => {
     Cookies.set("authToken", token);
+    console.log("the cookie is now set ", Cookies.get("authToken"));
     setUser(userData);
   };
   useEffect(() => {
-    console.log(user);
+    console.log(Cookies.get("authToken"));
   }, [user]);
   const logout = () => {
     Cookies.remove("authToken");
@@ -20,6 +21,9 @@ function AuthorizationContext({ children }) {
 
   const role = () => {
     return user?.role || null;
+  };
+  const isAutheticated = () => {
+    return Boolean(Cookies.get("authToken"));
   };
 
   return (
