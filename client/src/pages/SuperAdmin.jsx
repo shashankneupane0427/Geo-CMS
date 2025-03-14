@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { updatePlace, uploadImage } from "../../utils/Api"; // You'll need to create this function
+import { addPlace, updatePlace, uploadImage } from "../../utils/Api"; // You'll need to create this function
 import {
   addNewUser,
   deletePlace,
@@ -308,8 +308,17 @@ const SuperAdmin = () => {
   // Handle place update or add
   const handleSavePlace = () => {
     if (isAdding) {
-      // Add new place
-      setPlaces([...places, editingPlace]);
+      try {
+        const saving = addPlace(editingPlace);
+        toast.promise(saving, {
+          loading: "loading",
+          success: "Added the place Successfully",
+          error: "Coulnot add the place",
+        });
+      } catch (error) {
+        console.error("Error updating place:", error);
+        toast.error("Failed to update place");
+      }
     } else {
       // Update existing place
       try {
