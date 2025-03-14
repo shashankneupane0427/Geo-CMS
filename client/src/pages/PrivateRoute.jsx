@@ -2,33 +2,38 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthorizationContext";
 
-function PrivateRoute({ children }) {
+function PrivateRoute({ children, allowedRoles }) {
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const [initialized, setInitialized] = useState(false);
 
-  // Wait for user data to be loaded from localStorage
+  // Wait for user data to be loaded
   useEffect(() => {
-    // If localStorage check has completed (user was either loaded or confirmed not present)
     if (user !== null || localStorage.getItem("user") === null) {
       setInitialized(true);
     }
   }, [user]);
 
-  // Only check authentication after initialization is complete
+  // Redirect if not authenticated or not authorized
   useEffect(() => {
-    if (initialized && !isAuthenticated()) {
-      navigate("/");
+    if (initialized) {
+      if (!isAuthenticated()) {
+        navigate("/");
+      } else if (!allowedRoles.includes(user?.role)) {
+        navigate("/");
+      }
     }
-  }, [initialized, isAuthenticated, navigate]);
+  }, [initialized, isAuthenticated, user, allowedRoles, navigate]);
 
-  // Show loading while waiting for initialization
+  // Show loading while initializing
   if (!initialized) {
     return <div>Loading...</div>;
   }
 
-  // If authenticated, render children
-  return isAuthenticated() ? children : null;
+  // If authenticated and authorized, render the component
+  return isAuthenticated() && allowedRoles.includes(user?.role)
+    ? children
+    : null;
 }
 
 export default PrivateRoute;

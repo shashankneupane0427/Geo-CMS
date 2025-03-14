@@ -13,7 +13,7 @@ export const getAllData = AsyncError(async (req, res, next) => {
     return next(new HttpError(401, "No Access"));
   }
   const places = await place.find();
-  const users = await user.find();
+  const users = await user.find().select("-password");
   return res.status(200).json({
     status: "sucess",
     data: {

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
-// import { deleteSpecificUser, getProvinceUserData } from "../../utils/Api";
+import { getProvinceUserData } from "../../utils/Api";
 import { toast } from "sonner";
+import { useAuth } from "../context/AuthorizationContext.jsx";
 
 const ProvinceUser = () => {
   // Tab state management
@@ -11,9 +12,10 @@ const ProvinceUser = () => {
   const [isAddingUser, setIsAddingUser] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const fileInputRef = useRef(null);
+  const { user } = useAuth();
 
   // State for data
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState([]); // Initialize with an empty array
   const [places, setPlaces] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
 
@@ -134,28 +136,15 @@ const ProvinceUser = () => {
     images: [],
   };
 
+  // Fetch data on component mount
   useEffect(() => {
+    setCurrentUser(user);
     const fetchData = async () => {
       try {
-        // In a real app, this would get the province user's data
         const response = await getProvinceUserData();
-
-        // Get current user information
-        setCurrentUser(response.data.user);
-
-        // Filter users to only district users in this province
-        const provinceUsers = response.data.users.filter(
-          (user) =>
-            user.province === response.data.user.province &&
-            user.role === "District User"
-        );
-        setUsers(provinceUsers);
-
-        // Filter places to only those in this province
-        const provincePlaces = response.data.places.filter(
-          (place) => place.province === response.data.user.province
-        );
-        setPlaces(provincePlaces);
+        if (response?.data?.data) {
+          setUsers(response.data.data); // Set users with the API response
+        }
       } catch (error) {
         console.error("Error fetching province user data:", error);
         toast.error("Failed to load data");
@@ -163,7 +152,7 @@ const ProvinceUser = () => {
     };
 
     fetchData();
-  }, []);
+  }, [user]); // Add `user` as a dependency
 
   // Stats for dashboard
   const getDistrictStats = () => {
@@ -180,9 +169,11 @@ const ProvinceUser = () => {
     // Get unique districts covered by district users
     const coveredDistricts = new Set();
     users.forEach((user) => {
-      user.districts.forEach((district) => {
-        coveredDistricts.add(district);
-      });
+      if (user.districts) {
+        user.districts.forEach((district) => {
+          coveredDistricts.add(district);
+        });
+      }
     });
 
     return Math.round((coveredDistricts.size / allDistricts.length) * 100);
@@ -242,15 +233,16 @@ const ProvinceUser = () => {
 
   // Handle user delete
   const handleDeleteUser = async (id) => {
-    const deleted = deleteSpecificUser(id);
-    toast.promise(deleted, {
-      loading: "Deleting user...",
-      success: "User deleted successfully",
-      error: "Could not delete the user",
-    });
-
-    // Optimistic UI update
-    setUsers(users.filter((user) => user._id !== id));
+    try {
+      // Call the API to delete the user
+      await deleteSpecificUser(id); // Replace with your actual API call
+      // Optimistic UI update
+      setUsers((prevUsers) => prevUsers.filter((user) => user._id !== id));
+      toast.success("User deleted successfully");
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("Could not delete the user");
+    }
   };
 
   // Handle district selection
@@ -474,13 +466,6 @@ const ProvinceUser = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-white p-6 rounded-lg shadow-md">
-                <h3 className="text-lg font-medium mb-2">Places</h3>
-                <p className="text-3xl font-bold">{places?.length || 0}</p>
-                <p className="text-sm text-gray-500 mt-2">
-                  Total locations in province
-                </p>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-md">
                 <h3 className="text-lg font-medium mb-2">District Users</h3>
                 <p className="text-3xl font-bold">{users?.length || 0}</p>
                 <p className="text-sm text-gray-500 mt-2">
@@ -493,62 +478,6 @@ const ProvinceUser = () => {
                 <p className="text-sm text-gray-500 mt-2">
                   Total districts in province
                 </p>
-              </div>
-            </div>
-
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <h3 className="text-lg font-medium mb-4">District Coverage</h3>
-                <div className="relative pt-1">
-                  <div className="flex mb-2 items-center justify-between">
-                    <div>
-                      <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-blue-600 bg-blue-200">
-                        Coverage
-                      </span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-xs font-semibold inline-block text-blue-600">
-                        {getDistrictCoverage()}%
-                      </span>
-                    </div>
-                  </div>
-                  <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-blue-200">
-                    <div
-                      style={{ width: `${getDistrictCoverage()}%` }}
-                      className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500"
-                    ></div>
-                  </div>
-                  <p className="text-sm text-gray-500">
-                    {getDistrictCoverage() < 100
-                      ? "Some districts aren't assigned to any users"
-                      : "All districts are assigned to users"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <h3 className="text-lg font-medium mb-4">
-                  District Content Distribution
-                </h3>
-                <div className="space-y-2">
-                  {currentUser?.province &&
-                    nepalData[currentUser.province].map((district) => {
-                      const placeCount = places.filter(
-                        (place) => place.district === district
-                      ).length;
-                      return (
-                        <div
-                          key={district}
-                          className="flex items-center justify-between"
-                        >
-                          <span className="text-sm">{district}</span>
-                          <span className="text-sm font-medium">
-                            {placeCount} places
-                          </span>
-                        </div>
-                      );
-                    })}
-                </div>
               </div>
             </div>
           </div>
@@ -585,37 +514,40 @@ const ProvinceUser = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {users.map((user) => (
-                    <tr key={user._id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {user.email}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{user.role}</div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="text-sm text-gray-500">
-                          {user.district?.join(", ")}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button
-                          onClick={() => handleEditUser(user)}
-                          className="text-blue-600 hover:text-blue-900 mr-4"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteUser(user._id)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {Array.isArray(users) &&
+                    users.map((user) => (
+                      <tr key={user._id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            {user.email}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-500">
+                            {user.role}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-500">
+                            {user.district?.join(", ")}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button
+                            onClick={() => handleEditUser(user)}
+                            className="text-blue-600 hover:text-blue-900 mr-4"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteUser(user._id)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
@@ -635,45 +567,47 @@ const ProvinceUser = () => {
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {places.map((place) => (
-                <div
-                  key={place._id}
-                  className="bg-white rounded-lg shadow-md overflow-hidden"
-                >
-                  <div className="relative h-48">
-                    <img
-                      src={
-                        place.images[0] || "https://via.placeholder.com/400x200"
-                      }
-                      alt={place.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="p-4">
-                    <h3 className="text-lg font-medium">{place.title}</h3>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {place.district}, {place.province}
-                    </p>
-                    <p className="text-sm mt-2 line-clamp-2">
-                      {place.description}
-                    </p>
-                    <div className="flex justify-between mt-4">
-                      <button
-                        onClick={() => handleEditPlace(place)}
-                        className="text-blue-600 hover:text-blue-900"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeletePlace(place.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Delete
-                      </button>
+              {Array.isArray(places) &&
+                places.map((place) => (
+                  <div
+                    key={place._id}
+                    className="bg-white rounded-lg shadow-md overflow-hidden"
+                  >
+                    <div className="relative h-48">
+                      <img
+                        src={
+                          place.images[0] ||
+                          "https://via.placeholder.com/400x200"
+                        }
+                        alt={place.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-4">
+                      <h3 className="text-lg font-medium">{place.title}</h3>
+                      <p className="text-sm text-gray-500 mt-1">
+                        {place.district}, {place.province}
+                      </p>
+                      <p className="text-sm mt-2 line-clamp-2">
+                        {place.description}
+                      </p>
+                      <div className="flex justify-between mt-4">
+                        <button
+                          onClick={() => handleEditPlace(place)}
+                          className="text-blue-600 hover:text-blue-900"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeletePlace(place.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
         )}

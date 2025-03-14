@@ -28,10 +28,18 @@ export const deletePlace = (id) => base.delete(`/superadmin/places/${id}`);
 
 // Add this to your utils/Api.js file
 export const uploadImage = (formData) => {
-  return axios.post(`http://localhost:5001/api/v1/superadmin/places/image`, formData, {
-    withCredentials: true,
-    headers: {
-      'Content-Type': 'multipart/form-data'
+  return axios.post(
+    `http://localhost:5001/api/v1/superadmin/places/image`,
+    formData,
+    {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
     }
-  });
+  );
+};
+
+export const getProvinceUserData = () => {
+  return base.get("/provinceuser/allDistrictUsers");
 };

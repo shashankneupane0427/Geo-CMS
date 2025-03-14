@@ -24,15 +24,30 @@ function App() {
           <Route
             path="/superadmin"
             element={
-              <PrivateRoute>
-                <SuperAdmin></SuperAdmin>
+              <PrivateRoute allowedRoles={["admin"]}>
+                <SuperAdmin />
               </PrivateRoute>
             }
           />
 
-          <Route path="/provinceuser" element={<ProvinceUser />} />
-          <Route path="/districtuser" element={<DistrictUser />} />
-        </Route>{" "}
+          <Route
+            path="/provinceuser"
+            element={
+              <PrivateRoute allowedRoles={["Province User"]}>
+                <ProvinceUser />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/districtuser"
+            element={
+              <PrivateRoute allowedRoles={["District User"]}>
+                <DistrictUser />
+              </PrivateRoute>
+            }
+          />
+        </Route>
       </Routes>
     </AuthorizationContext>
   );
