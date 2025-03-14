@@ -14,7 +14,7 @@ import place from "../Models/places.js";
 
 export const getAllData = AsyncError(async (req, res, next) => {
   const loggedInuser = req.user;
-
+  console.log(loggedInuser);
   if (loggedInuser.role !== "admin") {
     return next(new HttpError(401, "No Access"));
   }
@@ -68,4 +68,15 @@ export const addNewUser = AsyncError(async (req, res, next) => {
   });
 });
 
-export const deletePlace = AsyncError(async (req, res, next) => {});
+export const deletePlace = AsyncError(async (req, res, next) => {
+  const placeExists = await place.findByIdAndDelete(req.params.id);
+  if (!placeExists) {
+    return next(
+      new HttpError(404, "The place of the id provided was not found")
+    );
+  }
+  return res.status(200).json({
+    status: "success",
+    message: "Deleted Successfully",
+  });
+});
