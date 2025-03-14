@@ -26,6 +26,9 @@ const Login = () => {
       case "admin":
         navigate("/superadmin");
         break;
+      case "Province User":
+        navigate("/provinceuser");
+        break;
       default:
         navigate("/");
     }
