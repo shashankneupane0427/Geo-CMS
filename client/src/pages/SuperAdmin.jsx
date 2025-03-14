@@ -6,6 +6,7 @@ import {
   UpdateUserData,
 } from "../../utils/Api";
 import { toast } from "sonner";
+import { useAuth } from "../context/AuthorizationContext.jsx";
 
 const SuperAdmin = () => {
   // Tab state management
@@ -16,6 +17,7 @@ const SuperAdmin = () => {
   const [isAddingUser, setIsAddingUser] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const fileInputRef = useRef(null);
+  const { logout } = useAuth();
 
   // Nepal provinces and districts data
   const nepalData = {
@@ -383,8 +385,8 @@ const SuperAdmin = () => {
 
   // Handle sign out
   const handleSignOut = () => {
+    logout();
     // In a real app, this would handle logout logic
-    alert("Signing out...");
     // Typically you would clear session/tokens and redirect to login page
   };
 
