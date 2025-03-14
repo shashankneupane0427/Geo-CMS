@@ -5,7 +5,12 @@ import {
   deleteSpecificUser,
   addNewUser,
 } from "../../utils/Api";
-import { addPlace, updatePlace, uploadImage } from "../../utils/Api";
+import {
+  addPlace,
+  updatePlace,
+  uploadImage,
+  getAllPlaces,
+} from "../../utils/Api";
 
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthorizationContext.jsx";
@@ -138,7 +143,7 @@ const ProvinceUser = () => {
       latitude: "",
       longitude: "",
     },
-    district: "",
+    district: user.district,
     province: "",
     description: "",
     images: [],
@@ -150,11 +155,18 @@ const ProvinceUser = () => {
     const fetchData = async () => {
       try {
         const response = await getProvinceUserData();
+        const responsePlace = await getAllPlaces();
         if (response?.data?.data) {
           setUsers(response.data.data);
           // Filter users based on province
           filterUsersByProvince(response.data.data, user?.province);
         }
+        console.log(responsePlace);
+        const tempFilteredPlaces = responsePlace.data.data.filter(
+          (place) => place.province === user?.province
+        );
+        setFilteredPlaces(tempFilteredPlaces);
+        setPlaces(tempFilteredPlaces);
       } catch (error) {
         console.error("Error fetching province user data:", error);
         toast.error("Failed to load data");
@@ -296,54 +308,44 @@ const ProvinceUser = () => {
   };
 
   // Handle file selection from device
-  const handleFileSelect = (e) => {
+  // Update the handleFileSelect function
+  const handleFileSelect = async (e) => {
     if (e.target.files && e.target.files.length > 0) {
-      const files = Array.from(e.target.files);
+      const file = e.target.files[0]; // Just get the first file
 
-      files.forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          // Demo images for simulation
-          const demoImages = [
-            "https://res.cloudinary.com/demo/image/upload/v1613720013/samples/landscapes/nature-mountains.jpg",
-            "https://res.cloudinary.com/demo/image/upload/v1582115272/samples/landscapes/architecture-signs.jpg",
-            "https://res.cloudinary.com/demo/image/upload/v1613720013/samples/landscapes/beach-boat.jpg",
-            "https://res.cloudinary.com/demo/image/upload/v1573055869/samples/landscapes/girl-urban-view.jpg",
-            "https://res.cloudinary.com/demo/image/upload/v1572271059/samples/landscapes/nature-mountain.jpg",
-          ];
+      // Create a FormData object to send the file
+      const formData = new FormData();
+      formData.append("file", file);
 
-          const randomImage =
-            demoImages[Math.floor(Math.random() * demoImages.length)];
+      try {
+        // Show loading state
+        toast.loading("Uploading image...");
 
+        // Call your API endpoint
+        const response = await uploadImage(formData);
+
+        // Dismiss loading toast
+        toast.dismiss();
+
+        if (response.data && response.data.data) {
+          // Add the returned image URL to your place's images array
           setEditingPlace({
             ...editingPlace,
-            images: [...editingPlace.images, randomImage],
+            images: [...editingPlace.images, response.data.data],
           });
-        };
-        reader.readAsDataURL(file);
-      });
+          toast.success("Image uploaded successfully");
+        }
+      } catch (error) {
+        toast.dismiss();
+        toast.error("Failed to upload image");
+        console.error("Image upload error:", error);
+      }
+
+      // Reset the file input so the same file can be selected again
+      e.target.value = "";
     }
   };
 
-  // Demo image upload
-  const handleImageUpload = () => {
-    // Simulate Cloudinary upload by adding a demo image
-    const demoImages = [
-      "https://res.cloudinary.com/demo/image/upload/v1613720013/samples/landscapes/nature-mountains.jpg",
-      "https://res.cloudinary.com/demo/image/upload/v1582115272/samples/landscapes/architecture-signs.jpg",
-      "https://res.cloudinary.com/demo/image/upload/v1613720013/samples/landscapes/beach-boat.jpg",
-      "https://res.cloudinary.com/demo/image/upload/v1573055869/samples/landscapes/girl-urban-view.jpg",
-      "https://res.cloudinary.com/demo/image/upload/v1572271059/samples/landscapes/nature-mountain.jpg",
-    ];
-
-    const randomImage =
-      demoImages[Math.floor(Math.random() * demoImages.length)];
-
-    setEditingPlace({
-      ...editingPlace,
-      images: [...editingPlace.images, randomImage],
-    });
-  };
   // Handle place update or add
   const handleSavePlace = () => {
     if (isAdding) {
@@ -637,198 +639,63 @@ const ProvinceUser = () => {
           </div>
         )}
 
-        {/* Places Tab */}
+        {/* Place Management */}
         {activeTab === "places" && (
           <div>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold">Place Management</h2>
               <button
                 onClick={handleAddPlace}
-                className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+                className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
               >
                 Add New Place
               </button>
             </div>
-
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      Title
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      District
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      Images
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredPlaces.map((place) => (
-                    <tr key={place._id || place.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {place.title}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {place.district}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">
-                          {place.images?.length || 0} image(s)
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button
-                          onClick={() => handleEditPlace(place)}
-                          className="text-blue-600 hover:text-blue-900 mr-4"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() =>
-                            handleDeletePlace(place._id || place.id)
-                          }
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                  {filteredPlaces.length === 0 && (
-                    <tr>
-                      <td
-                        colSpan="4"
-                        className="px-6 py-4 text-center text-sm text-gray-500"
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {places.map((place) => (
+                <div
+                  key={place._id}
+                  className="bg-white rounded-lg shadow-md overflow-hidden"
+                >
+                  <div className="relative h-48">
+                    <img
+                      src={
+                        place.images[0] || "https://via.placeholder.com/400x200"
+                      }
+                      alt={place.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-lg font-medium">{place.title}</h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {place.district}, {place.province}
+                    </p>
+                    <p className="text-sm mt-2 line-clamp-2">
+                      {place.description}
+                    </p>
+                    <div className="flex justify-between mt-4">
+                      <button
+                        onClick={() => handleEditPlace(place)}
+                        className="text-blue-600 hover:text-blue-900"
                       >
-                        No places found. Add a new place to get started.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeletePlace(place._id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
 
-        {/* Edit User Tab */}
-        {activeTab === "editUser" && editingUser && (
-          <div>
-            <h2 className="text-2xl font-bold mb-6">
-              {isAddingUser ? "Add New User" : "Edit User"}
-            </h2>
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={editingUser.email}
-                  onChange={(e) =>
-                    handleUserFieldChange("email", e.target.value)
-                  }
-                  className="w-full p-2 border rounded"
-                  placeholder="user@example.com"
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={editingUser.password}
-                    onChange={(e) =>
-                      handleUserFieldChange("password", e.target.value)
-                    }
-                    className="w-full p-2 border rounded"
-                    placeholder={
-                      isAddingUser
-                        ? "Enter password"
-                        : "Leave blank to keep current"
-                    }
-                  />
-                  <button
-                    type="button"
-                    className="absolute right-2 top-2 text-gray-500"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? "Hide" : "Show"}
-                  </button>
-                </div>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Assigned district
-                </label>
-                <div className="bg-gray-50 p-4 rounded border grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                  {currentUser?.province &&
-                    nepalData[currentUser.province].map((district) => (
-                      <div key={district} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id={district}
-                          checked={
-                            editingUser.district?.includes(district) || false
-                          }
-                          onChange={() => handledistrictelection(district)}
-                          className="mr-2"
-                        />
-                        <label htmlFor={district} className="text-sm">
-                          {district}
-                        </label>
-                      </div>
-                    ))}
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-4 mt-6">
-                <button
-                  onClick={() => {
-                    setEditingUser(null);
-                    setActiveTab("users");
-                  }}
-                  className="bg-gray-300 text-gray-800 py-2 px-4 rounded hover:bg-gray-400"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSaveUser}
-                  className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Edit Place Tab */}
+        {/* Edit Place */}
         {activeTab === "editPlace" && editingPlace && (
           <div>
             <div className="flex justify-between items-center mb-6">
@@ -863,18 +730,16 @@ const ProvinceUser = () => {
                     Province
                   </label>
                   <select
-                    value={editingPlace.province}
+                    value={user?.province}
                     onChange={(e) =>
                       handleFieldChange("province", e.target.value)
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Select Province</option>
-                    {Object.keys(nepalData).map((province) => (
-                      <option key={province} value={province}>
-                        {province}
-                      </option>
-                    ))}
+                    <option key={user?.province} value={user?.province}>
+                      {user?.province}
+                    </option>
                   </select>
                 </div>
                 <div>
@@ -980,6 +845,101 @@ const ProvinceUser = () => {
                 <button
                   onClick={handleSavePlace}
                   className="bg-blue-500 text-white py-2 px-6 rounded-md hover:bg-blue-600"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Edit User Tab */}
+        {activeTab === "editUser" && editingUser && (
+          <div>
+            <h2 className="text-2xl font-bold mb-6">
+              {isAddingUser ? "Add New User" : "Edit User"}
+            </h2>
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={editingUser.email}
+                  onChange={(e) =>
+                    handleUserFieldChange("email", e.target.value)
+                  }
+                  className="w-full p-2 border rounded"
+                  placeholder="user@example.com"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={editingUser.password}
+                    onChange={(e) =>
+                      handleUserFieldChange("password", e.target.value)
+                    }
+                    className="w-full p-2 border rounded"
+                    placeholder={
+                      isAddingUser
+                        ? "Enter password"
+                        : "Leave blank to keep current"
+                    }
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-2 top-2 text-gray-500"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Assigned district
+                </label>
+                <div className="bg-gray-50 p-4 rounded border grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                  {currentUser?.province &&
+                    nepalData[currentUser.province].map((district) => (
+                      <div key={district} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id={district}
+                          checked={
+                            editingUser.district?.includes(district) || false
+                          }
+                          onChange={() => handledistrictelection(district)}
+                          className="mr-2"
+                        />
+                        <label htmlFor={district} className="text-sm">
+                          {district}
+                        </label>
+                      </div>
+                    ))}
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-4 mt-6">
+                <button
+                  onClick={() => {
+                    setEditingUser(null);
+                    setActiveTab("users");
+                  }}
+                  className="bg-gray-300 text-gray-800 py-2 px-4 rounded hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveUser}
+                  className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
                 >
                   Save
                 </button>
