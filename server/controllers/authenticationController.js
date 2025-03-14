@@ -39,7 +39,7 @@ export const login = AsyncError(async (req, res, next) => {
 
 export const protect = AsyncError(async (req, res, next) => {
   const token = req.cookies.authToken;
-  console.log(token);
+  //(token);
   if (!token) {
     return next(new HttpError(401, "No token provided"));
   }

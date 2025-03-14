@@ -66,3 +66,5 @@ export const addNewUser = AsyncError(async (req, res, next) => {
     data: newUser,
   });
 });
+
+export const deletePlaec = AsyncError(async (req, res, next) => {});

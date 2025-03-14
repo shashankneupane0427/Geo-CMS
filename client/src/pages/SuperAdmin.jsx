@@ -917,7 +917,7 @@ const SuperAdmin = () => {
                             <input
                               type="checkbox"
                               id={`district-${onedistrict}`}
-                              checked={editingUser.district.includes(
+                              checked={editingUser?.district?.includes(
                                 onedistrict
                               )}
                               onChange={() =>

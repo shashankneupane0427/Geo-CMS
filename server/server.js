@@ -9,6 +9,7 @@ import autheticationRoutes from "./routes/authenticationRoutes.js";
 import superAdmin from "./routes/superAdminRoutes.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import HttpError from "./Errors/HttpErros.js";
 
 configDotenv();
 const app = express();
@@ -29,6 +30,9 @@ app.use(bodyParser.json());
 app.use("/api/v1/generalUsers", userRoutes);
 app.use("/api/v1/authorities", autheticationRoutes);
 app.use("/api/v1/superadmin", superAdmin);
+app.use("*", (req, res, next) => {
+  return next(new HttpError(404, `the url ${req.originalUrl} was not found`));
+});
 
 app.use(GlobalError);
 app.listen(process.env.PORT_NUMBER, () => {
