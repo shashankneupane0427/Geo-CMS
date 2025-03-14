@@ -226,7 +226,7 @@ const SuperAdmin = () => {
       (user) =>
         user.role === "Province User" &&
         user.province === province &&
-        (userId === null || user.id !== userId)
+        (userId === null || user._id !== userId)
     );
   };
 
@@ -236,13 +236,13 @@ const SuperAdmin = () => {
       // Remove district if already selected
       setEditingUser({
         ...editingUser,
-        districts: editingUser.district.filter((d) => d !== district),
+        district: editingUser.district.filter((d) => d !== district),
       });
     } else {
       // Add district if not already selected
       setEditingUser({
         ...editingUser,
-        districts: [...editingUser.district, district],
+        district: [...editingUser.district, district],
       });
     }
   };
@@ -895,12 +895,12 @@ const SuperAdmin = () => {
                           value={province}
                           disabled={
                             editingUser.role === "Province User" &&
-                            isProvinceAssigned(province, editingUser.id)
+                            isProvinceAssigned(province, editingUser._id)
                           }
                         >
                           {province}{" "}
                           {editingUser.role === "Province User" &&
-                          isProvinceAssigned(province, editingUser.id)
+                          isProvinceAssigned(province, editingUser._id)
                             ? "(Already assigned)"
                             : ""}
                         </option>
@@ -952,7 +952,7 @@ const SuperAdmin = () => {
                   disabled={
                     editingUser.role === "Province User" &&
                     editingUser.province &&
-                    isProvinceAssigned(editingUser.province, editingUser.id)
+                    isProvinceAssigned(editingUser.province, editingUser._id)
                   }
                 >
                   Save

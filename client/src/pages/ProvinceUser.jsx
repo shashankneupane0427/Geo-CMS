@@ -18,8 +18,10 @@ const ProvinceUser = () => {
   const [users, setUsers] = useState([]); // Initialize with an empty array
   const [places, setPlaces] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
+  const [filteredUsers, setFilteredUsers] = useState([]);
+  const [filteredPlaces, setFilteredPlaces] = useState([]);
 
-  // Nepal provinces and districts data
+  // Nepal provinces and district data
   const nepalData = {
     "Province 1": [
       "Bhojpur",
@@ -120,7 +122,7 @@ const ProvinceUser = () => {
     password: "",
     role: "District User",
     province: "",
-    districts: [],
+    district: [],
   };
 
   const newPlaceTemplate = {
@@ -143,7 +145,9 @@ const ProvinceUser = () => {
       try {
         const response = await getProvinceUserData();
         if (response?.data?.data) {
-          setUsers(response.data.data); // Set users with the API response
+          setUsers(response.data.data);
+          // Filter users based on province
+          filterUsersByProvince(response.data.data, user?.province);
         }
       } catch (error) {
         console.error("Error fetching province user data:", error);
@@ -154,8 +158,26 @@ const ProvinceUser = () => {
     fetchData();
   }, [user]); // Add `user` as a dependency
 
+  // Filter users based on province
+  const filterUsersByProvince = (allUsers, province) => {
+    if (!province || !allUsers) return;
+
+    const filtered = allUsers.filter((user) => user.province === province);
+    setFilteredUsers(filtered);
+  };
+
+  // Filter places based on province
+  useEffect(() => {
+    if (!currentUser?.province || !places) return;
+
+    const filtered = places.filter(
+      (place) => place.province === currentUser.province
+    );
+    setFilteredPlaces(filtered);
+  }, [places, currentUser]);
+
   // Stats for dashboard
-  const getDistrictStats = () => {
+  const getdistricttats = () => {
     const provinceName = currentUser?.province;
     return provinceName ? nepalData[provinceName].length : 0;
   };
@@ -163,20 +185,20 @@ const ProvinceUser = () => {
   const getDistrictCoverage = () => {
     if (!currentUser?.province) return 0;
 
-    // Get all districts in the province
-    const allDistricts = nepalData[currentUser.province];
+    // Get all district in the province
+    const alldistrict = nepalData[currentUser.province];
 
-    // Get unique districts covered by district users
-    const coveredDistricts = new Set();
-    users.forEach((user) => {
-      if (user.districts) {
-        user.districts.forEach((district) => {
-          coveredDistricts.add(district);
+    // Get unique district covered by district users
+    const covereddistrict = new Set();
+    filteredUsers.forEach((user) => {
+      if (user.district) {
+        user.district.forEach((district) => {
+          covereddistrict.add(district);
         });
       }
     });
 
-    return Math.round((coveredDistricts.size / allDistricts.length) * 100);
+    return Math.round((covereddistrict.size / alldistrict.length) * 100);
   };
 
   // Handle place edit
@@ -199,7 +221,9 @@ const ProvinceUser = () => {
 
   // Handle place delete
   const handleDeletePlace = (id) => {
-    setPlaces(places.filter((place) => place.id !== id));
+    setPlaces(places.filter((place) => place._id !== id));
+    // Also update filtered places
+    setFilteredPlaces(filteredPlaces.filter((place) => place._id !== id));
     toast.success("Place deleted successfully");
   };
 
@@ -238,6 +262,10 @@ const ProvinceUser = () => {
       await deleteSpecificUser(id); // Replace with your actual API call
       // Optimistic UI update
       setUsers((prevUsers) => prevUsers.filter((user) => user._id !== id));
+      // Also update filtered users
+      setFilteredUsers((prevUsers) =>
+        prevUsers.filter((user) => user._id !== id)
+      );
       toast.success("User deleted successfully");
     } catch (error) {
       console.error("Error deleting user:", error);
@@ -246,18 +274,18 @@ const ProvinceUser = () => {
   };
 
   // Handle district selection
-  const handleDistrictSelection = (district) => {
-    if (editingUser.districts.includes(district)) {
+  const handledistrictelection = (district) => {
+    if (editingUser.district.includes(district)) {
       // Remove district if already selected
       setEditingUser({
         ...editingUser,
-        districts: editingUser.districts.filter((d) => d !== district),
+        district: editingUser.district.filter((d) => d !== district),
       });
     } else {
       // Add district if not already selected
       setEditingUser({
         ...editingUser,
-        districts: [...editingUser.districts, district],
+        district: [...editingUser.district, district],
       });
     }
   };
@@ -315,15 +343,23 @@ const ProvinceUser = () => {
   const handleSavePlace = () => {
     if (isAdding) {
       // Add new place
-      setPlaces([...places, editingPlace]);
+      const newPlace = { ...editingPlace, province: currentUser?.province };
+      setPlaces([...places, newPlace]);
+      setFilteredPlaces([...filteredPlaces, newPlace]);
       toast.success("Place added successfully");
     } else {
       // Update existing place
-      setPlaces(
-        places.map((place) =>
-          place.id === editingPlace.id ? editingPlace : place
-        )
+      const updatedPlaces = places.map((place) =>
+        place._id === editingPlace._id ? editingPlace : place
       );
+      setPlaces(updatedPlaces);
+
+      // Update filtered places
+      const updatedFilteredPlaces = filteredPlaces.map((place) =>
+        place._id === editingPlace._id ? editingPlace : place
+      );
+      setFilteredPlaces(updatedFilteredPlaces);
+
       toast.success("Place updated successfully");
     }
     setEditingPlace(null);
@@ -333,15 +369,30 @@ const ProvinceUser = () => {
 
   // Handle user update or add
   const handleSaveUser = () => {
+    // Ensure province is set
+    const userWithProvince = {
+      ...editingUser,
+      province: currentUser?.province,
+    };
+
     if (isAddingUser) {
       // Add new user
-      setUsers([...users, editingUser]);
+      setUsers([...users, userWithProvince]);
+      setFilteredUsers([...filteredUsers, userWithProvince]);
       toast.success("User added successfully");
     } else {
       // Update existing user
-      setUsers(
-        users.map((user) => (user.id === editingUser.id ? editingUser : user))
+      const updatedUsers = users.map((user) =>
+        user._id === userWithProvince._id ? userWithProvince : user
       );
+      setUsers(updatedUsers);
+
+      // Update filtered users
+      const updatedFilteredUsers = filteredUsers.map((user) =>
+        user._id === userWithProvince._id ? userWithProvince : user
+      );
+      setFilteredUsers(updatedFilteredUsers);
+
       toast.success("User updated successfully");
     }
     setEditingUser(null);
@@ -420,241 +471,375 @@ const ProvinceUser = () => {
           </button>
         </div>
         <div className="mt-auto p-6">
-          {/* User profile */}
-          <div className="flex items-center mt-4 mb-4">
-            <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
-              <span className="text-xl font-bold text-white">P</span>
-            </div>
-            <div className="ml-3">
-              <p className="font-medium">
-                {currentUser?.email || "Province User"}
-              </p>
-              <p className="text-sm text-gray-500">
-                {currentUser?.province || "Province"}
-              </p>
-            </div>
-          </div>
           <button
             onClick={handleSignOut}
-            className="w-full bg-black text-white py-2 px-4 rounded-md hover:bg-red-600 flex items-center justify-center mt-2"
+            className="w-full bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600"
           >
-            <svg
-              className="h-5 w-5 mr-2"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
-            </svg>
             Sign Out
           </button>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 overflow-y-auto p-6">
-        {/* Dashboard */}
+      {/* Main Content Area */}
+      <div className="flex-1 overflow-y-auto p-8">
+        {/* Dashboard Tab */}
         {activeTab === "dashboard" && (
           <div>
-            <h2 className="text-2xl font-bold mb-6">
-              {currentUser?.province || "Province"} Dashboard
-            </h2>
+            <h2 className="text-2xl font-bold mb-6">Dashboard</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <h3 className="text-lg font-medium mb-2">District Users</h3>
-                <p className="text-3xl font-bold">{users?.length || 0}</p>
-                <p className="text-sm text-gray-500 mt-2">
-                  Total district users
+              <div className="bg-white p-6 rounded-lg shadow">
+                <h3 className="text-lg font-medium">district</h3>
+                <p className="text-3xl font-bold mt-2">{getdistricttats()}</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Total district in province
                 </p>
               </div>
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <h3 className="text-lg font-medium mb-2">Districts</h3>
-                <p className="text-3xl font-bold">{getDistrictStats()}</p>
-                <p className="text-sm text-gray-500 mt-2">
-                  Total districts in province
+
+              <div className="bg-white p-6 rounded-lg shadow">
+                <h3 className="text-lg font-medium">District Users</h3>
+                <p className="text-3xl font-bold mt-2">
+                  {filteredUsers.length}
                 </p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Active district users
+                </p>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow">
+                <h3 className="text-lg font-medium">District Coverage</h3>
+                <p className="text-3xl font-bold mt-2">
+                  {getDistrictCoverage()}%
+                </p>
+                <p className="text-sm text-gray-500 mt-1">
+                  district with assigned users
+                </p>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-3">
+                <h3 className="text-lg font-medium mb-4">Places by District</h3>
+                <div className="h-64 flex items-center justify-center bg-gray-100 rounded">
+                  <p className="text-gray-500">
+                    Chart will be displayed here showing place distribution
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* User Management */}
+        {/* Users Tab */}
         {activeTab === "users" && (
           <div>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold">District User Management</h2>
               <button
                 onClick={handleAddUser}
-                className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
+                className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
               >
-                Add New District User
+                Add New User
               </button>
             </div>
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <table className="min-w-full">
+
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
                       Email
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Role
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      district
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Districts
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
                       Actions
                     </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {Array.isArray(users) &&
-                    users.map((user) => (
-                      <tr key={user._id}>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">
-                            {user.email}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-500">
-                            {user.role}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm text-gray-500">
-                            {user.district?.join(", ")}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <button
-                            onClick={() => handleEditUser(user)}
-                            className="text-blue-600 hover:text-blue-900 mr-4"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteUser(user._id)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                  {filteredUsers.map((user) => (
+                    <tr key={user._id || user.id}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">
+                          {user.email}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900">
+                          {user.district ? user.district.join(", ") : "None"}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            user.isActive
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {user.isActive ? "Active" : "Inactive"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button
+                          onClick={() => handleEditUser(user)}
+                          className="text-blue-600 hover:text-blue-900 mr-4"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(user._id || user.id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {filteredUsers.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan="4"
+                        className="px-6 py-4 text-center text-sm text-gray-500"
+                      >
+                        No users found. Add a new district user to get started.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
           </div>
         )}
 
-        {/* Place Management */}
+        {/* Places Tab */}
         {activeTab === "places" && (
           <div>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold">Place Management</h2>
               <button
                 onClick={handleAddPlace}
-                className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
+                className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
               >
                 Add New Place
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Array.isArray(places) &&
-                places.map((place) => (
-                  <div
-                    key={place._id}
-                    className="bg-white rounded-lg shadow-md overflow-hidden"
-                  >
-                    <div className="relative h-48">
-                      <img
-                        src={
-                          place.images[0] ||
-                          "https://via.placeholder.com/400x200"
-                        }
-                        alt={place.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="p-4">
-                      <h3 className="text-lg font-medium">{place.title}</h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        {place.district}, {place.province}
-                      </p>
-                      <p className="text-sm mt-2 line-clamp-2">
-                        {place.description}
-                      </p>
-                      <div className="flex justify-between mt-4">
+
+            <div className="bg-white rounded-lg shadow overflow-hidden">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Title
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      District
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Images
+                    </th>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    >
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredPlaces.map((place) => (
+                    <tr key={place._id || place.id}>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">
+                          {place.title}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {place.district}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900">
+                          {place.images?.length || 0} image(s)
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
                           onClick={() => handleEditPlace(place)}
-                          className="text-blue-600 hover:text-blue-900"
+                          className="text-blue-600 hover:text-blue-900 mr-4"
                         >
                           Edit
                         </button>
                         <button
-                          onClick={() => handleDeletePlace(place.id)}
+                          onClick={() =>
+                            handleDeletePlace(place._id || place.id)
+                          }
                           className="text-red-600 hover:text-red-900"
                         >
                           Delete
                         </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                      </td>
+                    </tr>
+                  ))}
+                  {filteredPlaces.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan="4"
+                        className="px-6 py-4 text-center text-sm text-gray-500"
+                      >
+                        No places found. Add a new place to get started.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
 
-        {/* Edit Place */}
+        {/* Edit User Tab */}
+        {activeTab === "editUser" && editingUser && (
+          <div>
+            <h2 className="text-2xl font-bold mb-6">
+              {isAddingUser ? "Add New User" : "Edit User"}
+            </h2>
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={editingUser.email}
+                  onChange={(e) =>
+                    handleUserFieldChange("email", e.target.value)
+                  }
+                  className="w-full p-2 border rounded"
+                  placeholder="user@example.com"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={editingUser.password}
+                    onChange={(e) =>
+                      handleUserFieldChange("password", e.target.value)
+                    }
+                    className="w-full p-2 border rounded"
+                    placeholder={
+                      isAddingUser
+                        ? "Enter password"
+                        : "Leave blank to keep current"
+                    }
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-2 top-2 text-gray-500"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Assigned district
+                </label>
+                <div className="bg-gray-50 p-4 rounded border grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                  {currentUser?.province &&
+                    nepalData[currentUser.province].map((district) => (
+                      <div key={district} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id={district}
+                          checked={
+                            editingUser.district?.includes(district) || false
+                          }
+                          onChange={() => handledistrictelection(district)}
+                          className="mr-2"
+                        />
+                        <label htmlFor={district} className="text-sm">
+                          {district}
+                        </label>
+                      </div>
+                    ))}
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-4 mt-6">
+                <button
+                  onClick={() => {
+                    setEditingUser(null);
+                    setActiveTab("users");
+                  }}
+                  className="bg-gray-300 text-gray-800 py-2 px-4 rounded hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveUser}
+                  className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Place Tab */}
         {activeTab === "editPlace" && editingPlace && (
           <div>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">
-                {isAdding ? "Add New Place" : "Edit Place"}
-              </h2>
-              <button
-                onClick={() => {
-                  setEditingPlace(null);
-                  setActiveTab("places");
-                }}
-                className="text-gray-600 hover:text-gray-900"
-              >
-                Cancel
-              </button>
-            </div>
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <h2 className="text-2xl font-bold mb-6">
+              {isAdding ? "Add New Place" : "Edit Place"}
+            </h2>
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Title
+                </label>
+                <input
+                  type="text"
+                  value={editingPlace.title}
+                  onChange={(e) => handleFieldChange("title", e.target.value)}
+                  className="w-full p-2 border rounded"
+                  placeholder="Place title"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Title
-                  </label>
-                  <input
-                    type="text"
-                    value={editingPlace.title}
-                    onChange={(e) => handleFieldChange("title", e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Province
-                  </label>
-                  <input
-                    type="text"
-                    value={currentUser?.province || ""}
-                    disabled
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
                     District
                   </label>
                   <select
@@ -662,7 +847,7 @@ const ProvinceUser = () => {
                     onChange={(e) =>
                       handleFieldChange("district", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-2 border rounded"
                   >
                     <option value="">Select District</option>
                     {currentUser?.province &&
@@ -673,8 +858,23 @@ const ProvinceUser = () => {
                       ))}
                   </select>
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    Province
+                  </label>
+                  <input
+                    type="text"
+                    value={currentUser?.province || ""}
+                    disabled
+                    className="w-full p-2 border rounded bg-gray-100"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
                     Latitude
                   </label>
                   <input
@@ -683,11 +883,13 @@ const ProvinceUser = () => {
                     onChange={(e) =>
                       handleFieldChange("location.latitude", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-2 border rounded"
+                    placeholder="Latitude (e.g., 27.7172)"
                   />
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
                     Longitude
                   </label>
                   <input
@@ -696,221 +898,84 @@ const ProvinceUser = () => {
                     onChange={(e) =>
                       handleFieldChange("location.longitude", e.target.value)
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-2 border rounded"
+                    placeholder="Longitude (e.g., 85.3240)"
                   />
                 </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description
-                  </label>
-                  <textarea
-                    value={editingPlace.description}
-                    onChange={(e) =>
-                      handleFieldChange("description", e.target.value)
-                    }
-                    rows="4"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  ></textarea>
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Images
-                  </label>
-                  <div className="flex flex-wrap gap-4 mb-4">
-                    {editingPlace.images.map((image, index) => (
-                      <div key={index} className="relative">
-                        <img
-                          src={image}
-                          alt={`Image ${index + 1}`}
-                          className="h-24 w-24 object-cover rounded-md"
-                        />
-                        <button
-                          onClick={() => handleDeleteImage(index)}
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center"
-                        >
-                          ×
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center">
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleFileSelect}
-                      className="hidden"
-                      multiple
-                    />
-                    <button
-                      onClick={() => fileInputRef.current.click()}
-                      className="bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 mr-2"
-                    >
-                      Select Files
-                    </button>
-                    <button
-                      onClick={handleImageUpload}
-                      className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
-                    >
-                      Upload Demo Image
-                    </button>
-                  </div>
-                </div>
               </div>
-              <div className="mt-6 flex justify-end">
-                <button
-                  onClick={handleSavePlace}
-                  className="bg-blue-500 text-white py-2 px-6 rounded-md hover:bg-blue-600"
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
-        {/* Edit User */}
-        {activeTab === "editUser" && editingUser && (
-          <div>
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">
-                {isAddingUser ? "Add New District User" : "Edit District User"}
-              </h2>
-              <button
-                onClick={() => {
-                  setEditingUser(null);
-                  setActiveTab("users");
-                }}
-                className="text-gray-600 hover:text-gray-900"
-              >
-                Cancel
-              </button>
-            </div>
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={editingUser.email}
-                    onChange={(e) =>
-                      handleUserFieldChange("email", e.target.value)
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                {isAddingUser && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Password
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        value={editingUser.password}
-                        onChange={(e) =>
-                          handleUserFieldChange("password", e.target.value)
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Description
+                </label>
+                <textarea
+                  value={editingPlace.description}
+                  onChange={(e) =>
+                    handleFieldChange("description", e.target.value)
+                  }
+                  className="w-full p-2 border rounded"
+                  rows="4"
+                  placeholder="Describe this place..."
+                ></textarea>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Images
+                </label>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
+                  {editingPlace.images.map((image, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={image}
+                        alt={`Place image ${index + 1}`}
+                        className="w-full h-32 object-cover rounded"
                       />
                       <button
-                        type="button"
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                        onClick={() => setShowPassword(!showPassword)}
+                        onClick={() => handleDeleteImage(index)}
+                        className="absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center"
                       >
-                        {showPassword ? (
-                          <svg
-                            className="h-5 w-5 text-gray-400"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
-                            />
-                          </svg>
-                        ) : (
-                          <svg
-                            className="h-5 w-5 text-gray-400"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                            />
-                          </svg>
-                        )}
+                        ×
                       </button>
                     </div>
-                  </div>
-                )}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Role
-                  </label>
-                  <input
-                    type="text"
-                    value="District User"
-                    disabled
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100"
-                  />
+                  ))}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Province
-                  </label>
+                <div className="flex space-x-2">
                   <input
-                    type="text"
-                    value={currentUser?.province || ""}
-                    disabled
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100"
+                    type="file"
+                    multiple
+                    ref={fileInputRef}
+                    onChange={handleFileSelect}
+                    className="hidden"
                   />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Assigned Districts
-                  </label>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-2">
-                    {currentUser?.province &&
-                      nepalData[currentUser.province].map((district) => (
-                        <div key={district} className="flex items-center">
-                          <input
-                            type="checkbox"
-                            id={`district-${district}`}
-                            checked={editingUser.districts.includes(district)}
-                            onChange={() => handleDistrictSelection(district)}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                          />
-                          <label
-                            htmlFor={`district-${district}`}
-                            className="ml-2 block text-sm text-gray-900"
-                          >
-                            {district}
-                          </label>
-                        </div>
-                      ))}
-                  </div>
+                  <button
+                    onClick={() => fileInputRef.current.click()}
+                    className="bg-gray-200 text-gray-800 py-2 px-4 rounded hover:bg-gray-300"
+                  >
+                    Select Images
+                  </button>
+                  <button
+                    onClick={handleImageUpload}
+                    className="bg-gray-200 text-gray-800 py-2 px-4 rounded hover:bg-gray-300"
+                  >
+                    Add Demo Image
+                  </button>
                 </div>
               </div>
-              <div className="mt-6 flex justify-end">
+
+              <div className="flex justify-end space-x-4 mt-6">
                 <button
-                  onClick={handleSaveUser}
-                  className="bg-blue-500 text-white py-2 px-6 rounded-md hover:bg-blue-600"
+                  onClick={() => {
+                    setEditingPlace(null);
+                    setActiveTab("places");
+                  }}
+                  className="bg-gray-300 text-gray-800 py-2 px-4 rounded hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSavePlace}
+                  className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
                 >
                   Save
                 </button>
