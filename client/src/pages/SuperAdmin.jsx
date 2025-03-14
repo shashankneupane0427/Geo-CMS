@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { updatePlace, uploadImage } from "../../utils/Api"; // You'll need to create this function
 import {
   addNewUser,
   deletePlace,
@@ -10,6 +12,7 @@ import { toast } from "sonner";
 import { useAuth } from "../context/AuthorizationContext.jsx";
 
 const SuperAdmin = () => {
+  const navigate = useNavigate();
   // Tab state management
   const [activeTab, setActiveTab] = useState("dashboard");
   const [editingPlace, setEditingPlace] = useState(null);
@@ -244,43 +247,41 @@ const SuperAdmin = () => {
     }
   };
 
-  // Handle file selection from device
-  const handleFileSelect = (e) => {
+  // Update the handleFileSelect function
+  const handleFileSelect = async (e) => {
     if (e.target.files && e.target.files.length > 0) {
-      // In a real app, this would upload the file to Cloudinary
-      // For demo, we'll create an object URL and pretend it's a Cloudinary URL
-      const files = Array.from(e.target.files);
+      const file = e.target.files[0]; // Just get the first file
 
-      // Normally, you would upload these files to Cloudinary here
-      // This is a simplified simulation for the demo
-      files.forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          // In a real implementation, you would:
-          // 1. Send the file to your backend
-          // 2. Backend uploads to Cloudinary
-          // 3. Get back the Cloudinary URL
-          // 4. Update state with that URL
+      // Create a FormData object to send the file
+      const formData = new FormData();
+      formData.append("file", file);
 
-          // For this demo, we'll simulate by using a fake Cloudinary URL
-          const demoImages = [
-            "https://res.cloudinary.com/demo/image/upload/v1613720013/samples/landscapes/nature-mountains.jpg",
-            "https://res.cloudinary.com/demo/image/upload/v1582115272/samples/landscapes/architecture-signs.jpg",
-            "https://res.cloudinary.com/demo/image/upload/v1613720013/samples/landscapes/beach-boat.jpg",
-            "https://res.cloudinary.com/demo/image/upload/v1573055869/samples/landscapes/girl-urban-view.jpg",
-            "https://res.cloudinary.com/demo/image/upload/v1572271059/samples/landscapes/nature-mountain.jpg",
-          ];
+      try {
+        // Show loading state
+        toast.loading("Uploading image...");
 
-          const randomImage =
-            demoImages[Math.floor(Math.random() * demoImages.length)];
+        // Call your API endpoint
+        const response = await uploadImage(formData);
 
+        // Dismiss loading toast
+        toast.dismiss();
+
+        if (response.data && response.data.data) {
+          // Add the returned image URL to your place's images array
           setEditingPlace({
             ...editingPlace,
-            images: [...editingPlace.images, randomImage],
+            images: [...editingPlace.images, response.data.data],
           });
-        };
-        reader.readAsDataURL(file);
-      });
+          toast.success("Image uploaded successfully");
+        }
+      } catch (error) {
+        toast.dismiss();
+        toast.error("Failed to upload image");
+        console.error("Image upload error:", error);
+      }
+
+      // Reset the file input so the same file can be selected again
+      e.target.value = "";
     }
   };
 
@@ -311,11 +312,17 @@ const SuperAdmin = () => {
       setPlaces([...places, editingPlace]);
     } else {
       // Update existing place
-      setPlaces(
-        places.map((place) =>
-          place.id === editingPlace.id ? editingPlace : place
-        )
-      );
+      try {
+        const saving = updatePlace(editingPlace, editingPlace._id);
+        toast.promise(saving, {
+          loading: "loading",
+          success: "Updated the place Successfully",
+          error: "Coulnot update the place",
+        });
+      } catch (error) {
+        console.error("Error updating place:", error);
+        toast.error("Failed to update place");
+      }
     }
     setEditingPlace(null);
     setIsAdding(false);
@@ -776,19 +783,13 @@ const SuperAdmin = () => {
                       ref={fileInputRef}
                       onChange={handleFileSelect}
                       className="hidden"
-                      multiple
+                      accept="image/*" // Restrict to image files only
                     />
                     <button
                       onClick={() => fileInputRef.current.click()}
-                      className="bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 mr-2"
-                    >
-                      Select Files
-                    </button>
-                    <button
-                      onClick={handleImageUpload}
                       className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
                     >
-                      Upload Demo Image
+                      Upload Image
                     </button>
                   </div>
                 </div>

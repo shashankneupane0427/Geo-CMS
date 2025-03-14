@@ -16,14 +16,6 @@ export const UpdateUserData = (id, data) => {
   base.patch(`/superadmin/user/${id}`, data);
 };
 export const addNewUser = (data) => base.post(`/superadmin/users`, data);
-export const uploadImage = (file) => {
-  axios.post("http://localhost:5001/api/v1/superadmin/places/image", file, {
-    withCredentials: true,
-    headers: {
-      "Content-Type": "multipart/form-data'",
-    },
-  });
-};
 export const updatePlace = (data, id) => {
   base.post(`/superAdmin/places/${id}`, data);
 };
@@ -33,3 +25,13 @@ export const addPlace = (data) => {
 };
 
 export const deletePlace = (id) => base.delete(`/superadmin/places/${id}`);
+
+// Add this to your utils/Api.js file
+export const uploadImage = (formData) => {
+  return axios.post(`http://localhost:5001/api/v1/superadmin/places/image`, formData, {
+    withCredentials: true,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+};
