@@ -5,6 +5,8 @@ import {
   deleteSpecificUser,
   addNewUser,
 } from "../../utils/Api";
+import { addPlace, updatePlace, uploadImage } from "../../utils/Api";
+
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthorizationContext.jsx";
 
@@ -131,7 +133,6 @@ const ProvinceUser = () => {
   };
 
   const newPlaceTemplate = {
-    id: null,
     title: "",
     location: {
       latitude: "",
@@ -326,6 +327,7 @@ const ProvinceUser = () => {
 
   // Demo image upload
   const handleImageUpload = () => {
+    // Simulate Cloudinary upload by adding a demo image
     const demoImages = [
       "https://res.cloudinary.com/demo/image/upload/v1613720013/samples/landscapes/nature-mountains.jpg",
       "https://res.cloudinary.com/demo/image/upload/v1582115272/samples/landscapes/architecture-signs.jpg",
@@ -342,29 +344,33 @@ const ProvinceUser = () => {
       images: [...editingPlace.images, randomImage],
     });
   };
-
   // Handle place update or add
   const handleSavePlace = () => {
     if (isAdding) {
-      // Add new place
-      const newPlace = { ...editingPlace, province: currentUser?.province };
-      setPlaces([...places, newPlace]);
-      setFilteredPlaces([...filteredPlaces, newPlace]);
-      toast.success("Place added successfully");
+      try {
+        const saving = addPlace(editingPlace);
+        toast.promise(saving, {
+          loading: "loading",
+          success: "Added the place Successfully",
+          error: "Coulnot add the place",
+        });
+      } catch (error) {
+        console.error("Error updating place:", error);
+        toast.error("Failed to update place");
+      }
     } else {
       // Update existing place
-      const updatedPlaces = places.map((place) =>
-        place._id === editingPlace._id ? editingPlace : place
-      );
-      setPlaces(updatedPlaces);
-
-      // Update filtered places
-      const updatedFilteredPlaces = filteredPlaces.map((place) =>
-        place._id === editingPlace._id ? editingPlace : place
-      );
-      setFilteredPlaces(updatedFilteredPlaces);
-
-      toast.success("Place updated successfully");
+      try {
+        const saving = updatePlace(editingPlace, editingPlace._id);
+        toast.promise(saving, {
+          loading: "loading",
+          success: "Updated the place Successfully",
+          error: "Coulnot update the place",
+        });
+      } catch (error) {
+        console.error("Error updating place:", error);
+        toast.error("Failed to update place");
+      }
     }
     setEditingPlace(null);
     setIsAdding(false);
@@ -825,26 +831,54 @@ const ProvinceUser = () => {
         {/* Edit Place Tab */}
         {activeTab === "editPlace" && editingPlace && (
           <div>
-            <h2 className="text-2xl font-bold mb-6">
-              {isAdding ? "Add New Place" : "Edit Place"}
-            </h2>
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Title
-                </label>
-                <input
-                  type="text"
-                  value={editingPlace.title}
-                  onChange={(e) => handleFieldChange("title", e.target.value)}
-                  className="w-full p-2 border rounded"
-                  placeholder="Place title"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">
+                {isAdding ? "Add New Place" : "Edit Place"}
+              </h2>
+              <button
+                onClick={() => {
+                  setEditingPlace(null);
+                  setActiveTab("places");
+                }}
+                className="text-gray-600 hover:text-gray-900"
+              >
+                Cancel
+              </button>
+            </div>
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    value={editingPlace.title}
+                    onChange={(e) => handleFieldChange("title", e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Province
+                  </label>
+                  <select
+                    value={editingPlace.province}
+                    onChange={(e) =>
+                      handleFieldChange("province", e.target.value)
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select Province</option>
+                    {Object.keys(nepalData).map((province) => (
+                      <option key={province} value={province}>
+                        {province}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     District
                   </label>
                   <select
@@ -852,34 +886,20 @@ const ProvinceUser = () => {
                     onChange={(e) =>
                       handleFieldChange("district", e.target.value)
                     }
-                    className="w-full p-2 border rounded"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    disabled={!editingPlace.province}
                   >
                     <option value="">Select District</option>
-                    {currentUser?.province &&
-                      nepalData[currentUser.province].map((district) => (
+                    {editingPlace.province &&
+                      nepalData[editingPlace.province].map((district) => (
                         <option key={district} value={district}>
                           {district}
                         </option>
                       ))}
                   </select>
                 </div>
-
                 <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
-                    Province
-                  </label>
-                  <input
-                    type="text"
-                    value={currentUser?.province || ""}
-                    disabled
-                    className="w-full p-2 border rounded bg-gray-100"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Latitude
                   </label>
                   <input
@@ -888,13 +908,11 @@ const ProvinceUser = () => {
                     onChange={(e) =>
                       handleFieldChange("location.latitude", e.target.value)
                     }
-                    className="w-full p-2 border rounded"
-                    placeholder="Latitude (e.g., 27.7172)"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-
                 <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Longitude
                   </label>
                   <input
@@ -903,84 +921,65 @@ const ProvinceUser = () => {
                     onChange={(e) =>
                       handleFieldChange("location.longitude", e.target.value)
                     }
-                    className="w-full p-2 border rounded"
-                    placeholder="Longitude (e.g., 85.3240)"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Description
-                </label>
-                <textarea
-                  value={editingPlace.description}
-                  onChange={(e) =>
-                    handleFieldChange("description", e.target.value)
-                  }
-                  className="w-full p-2 border rounded"
-                  rows="4"
-                  placeholder="Describe this place..."
-                ></textarea>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2">
-                  Images
-                </label>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
-                  {editingPlace.images.map((image, index) => (
-                    <div key={index} className="relative">
-                      <img
-                        src={image}
-                        alt={`Place image ${index + 1}`}
-                        className="w-full h-32 object-cover rounded"
-                      />
-                      <button
-                        onClick={() => handleDeleteImage(index)}
-                        className="absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    value={editingPlace.description}
+                    onChange={(e) =>
+                      handleFieldChange("description", e.target.value)
+                    }
+                    rows="4"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  ></textarea>
                 </div>
-                <div className="flex space-x-2">
-                  <input
-                    type="file"
-                    multiple
-                    ref={fileInputRef}
-                    onChange={handleFileSelect}
-                    className="hidden"
-                  />
-                  <button
-                    onClick={() => fileInputRef.current.click()}
-                    className="bg-gray-200 text-gray-800 py-2 px-4 rounded hover:bg-gray-300"
-                  >
-                    Select Images
-                  </button>
-                  <button
-                    onClick={handleImageUpload}
-                    className="bg-gray-200 text-gray-800 py-2 px-4 rounded hover:bg-gray-300"
-                  >
-                    Add Demo Image
-                  </button>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Images
+                  </label>
+                  <div className="flex flex-wrap gap-4 mb-4">
+                    {editingPlace.images.map((image, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={image}
+                          alt={`Image ${index + 1}`}
+                          className="h-24 w-24 object-cover rounded-md"
+                        />
+                        <button
+                          onClick={() => handleDeleteImage(index)}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileSelect}
+                      className="hidden"
+                      accept="image/*" // Restrict to image files only
+                    />
+                    <button
+                      onClick={() => fileInputRef.current.click()}
+                      className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600"
+                    >
+                      Upload Image
+                    </button>
+                  </div>
                 </div>
               </div>
-
-              <div className="flex justify-end space-x-4 mt-6">
-                <button
-                  onClick={() => {
-                    setEditingPlace(null);
-                    setActiveTab("places");
-                  }}
-                  className="bg-gray-300 text-gray-800 py-2 px-4 rounded hover:bg-gray-400"
-                >
-                  Cancel
-                </button>
+              <div className="mt-6 flex justify-end">
                 <button
                   onClick={handleSavePlace}
-                  className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+                  className="bg-blue-500 text-white py-2 px-6 rounded-md hover:bg-blue-600"
                 >
                   Save
                 </button>
