@@ -10,9 +10,9 @@ import {
 const router = express.Router();
 
 router.get("/allUsers", protect, getAllUsers);
-router.get("/allData", getAllData);
-router.delete("/user/:id", deleteUserData);
-router.patch("/user/:id", updateUserData);
-router.post("/users", addNewUser);
+router.get("/allData", protect, getAllData);
+router.delete("/user/:id", protect, deleteUserData);
+router.patch("/user/:id", protect, updateUserData);
+router.post("/users", protect, addNewUser);
 
 export default router;

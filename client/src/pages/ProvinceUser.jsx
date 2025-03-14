@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { deleteSpecificUser, getProvinceUserData } from "../../utils/Api";
+// import { deleteSpecificUser, getProvinceUserData } from "../../utils/Api";
 import { toast } from "sonner";
 
 const ProvinceUser = () => {

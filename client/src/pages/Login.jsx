@@ -49,10 +49,9 @@ const Login = () => {
       setResponse(serverResponse);
 
       toast.success("Logged in successfully");
-      const decode = jwtDecode(serverResponse.data.token);
-      loginForContext(serverResponse.data.token, decode);
+      loginForContext(serverResponse.data.user);
 
-      redirectBasedOnRole(decode.role);
+      redirectBasedOnRole(serverResponse.data.user.role);
 
       // login(response);
     } catch (err) {

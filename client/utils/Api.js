@@ -5,6 +5,7 @@ const base = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 });
 
 export const getAllPlaces = () => base.get("/generalUsers/places");

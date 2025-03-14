@@ -17,19 +17,34 @@ export const login = AsyncError(async (req, res, next) => {
     { role: userDetail.role, id: userDetail._id },
     process.env.JWT_SECRET
   );
+
+  res.cookie("authToken", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+  });
+  const userResponse = {
+    _id: userDetail._id,
+    email: userDetail.email,
+    role: userDetail.role,
+    district: userDetail.district,
+    province: userDetail.province,
+  };
+
   return res.status(200).json({
     message: "Logged in successfully",
-    token,
+    user: userResponse,
   });
 });
 
 export const protect = AsyncError(async (req, res, next) => {
-  const token = req.headers.authorization;
+  const token = req.cookies.authToken;
+  console.log(token);
   if (!token) {
     return next(new HttpError(401, "No token provided"));
   }
-  const mainToken = token.split(" ")[1];
-  const decode = jwt.verify(mainToken, process.env.JWT_SECRET);
+
+  const decode = jwt.verify(token, process.env.JWT_SECRET);
   if (!decode) {
     return next(new HttpError(401, "Unauthorized"));
   }
