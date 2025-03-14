@@ -91,3 +91,30 @@ export const imageUpload = AsyncError(async (req, res, next) => {
     data: fileString.url,
   });
 });
+
+export const uploadPlace = AsyncError(async (req, res, next) => {
+  const exitsingPlace = await place.findById(req.params.id);
+  if (!exitsingPlace) {
+    return next(new HttpError(404, "the place of the id was not found"));
+  }
+  Object.assign(exitsingPlace, req.body);
+  await exitsingPlace.save();
+  return res.status(200).json({
+    status: "success",
+    message: "place updated successfully",
+    data: exitsingPlace,
+  });
+});
+
+export const addPlace = AsyncError(async (req, res, next) => {
+  const newPlace = await place.create(req.body);
+
+  if (!newPlace) {
+    return next(new HttpError(404, "The place was not found"));
+  }
+  return res.status(200).json({
+    status: "success",
+    message: "Added successfully",
+    data: newPlace,
+  });
+});
