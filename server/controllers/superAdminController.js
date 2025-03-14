@@ -63,6 +63,8 @@ export const addNewUser = AsyncError(async (req, res, next) => {
 });
 
 export const deletePlace = AsyncError(async (req, res, next) => {
+  console.log("inside the delete function");
+  console.log(req.params);
   const placeExists = await place.findByIdAndDelete(req.params.id);
   if (!placeExists) {
     return next(

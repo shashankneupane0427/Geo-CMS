@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
   addNewUser,
+  deletePlace,
   deleteSpecificUser,
   getAllSuperAdminData,
   UpdateUserData,
@@ -172,8 +173,14 @@ const SuperAdmin = () => {
   };
 
   // Handle place delete
-  const handleDeletePlace = (id) => {
-    setPlaces(places.filter((place) => place.id !== id));
+  const handleDeletePlace = async (id) => {
+    console.log(id);
+    const deleteIt = deletePlace(id);
+    toast.promise(deleteIt, {
+      loading: "loading",
+      success: "Deleted successfully",
+      error: "An error occured",
+    });
   };
 
   // Handle image delete
@@ -619,7 +626,7 @@ const SuperAdmin = () => {
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDeletePlace(place.id)}
+                        onClick={() => handleDeletePlace(place._id)}
                         className="text-red-600 hover:text-red-900"
                       >
                         Delete
