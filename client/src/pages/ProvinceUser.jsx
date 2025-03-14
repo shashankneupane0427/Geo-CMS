@@ -1,5 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
-import { getProvinceUserData } from "../../utils/Api";
+import {
+  getProvinceUserData,
+  UpdateUserData,
+  deleteSpecificUser,
+  addNewUser,
+} from "../../utils/Api";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthorizationContext.jsx";
 
@@ -15,7 +20,7 @@ const ProvinceUser = () => {
   const { user } = useAuth();
 
   // State for data
-  const [users, setUsers] = useState([]); // Initialize with an empty array
+  const [users, setUsers] = useState([]);
   const [places, setPlaces] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -248,7 +253,6 @@ const ProvinceUser = () => {
   const handleAddUser = () => {
     setEditingUser({
       ...newUserTemplate,
-      id: users.length + 1,
       province: currentUser?.province || "",
     });
     setIsAddingUser(true);
@@ -370,6 +374,7 @@ const ProvinceUser = () => {
   // Handle user update or add
   const handleSaveUser = () => {
     // Ensure province is set
+    console.log(editingUser);
     const userWithProvince = {
       ...editingUser,
       province: currentUser?.province,
@@ -377,23 +382,23 @@ const ProvinceUser = () => {
 
     if (isAddingUser) {
       // Add new user
-      setUsers([...users, userWithProvince]);
-      setFilteredUsers([...filteredUsers, userWithProvince]);
-      toast.success("User added successfully");
+      console.log(editingUser);
+      const added = addNewUser(userWithProvince);
+
+      toast.promise(added, {
+        loading: "loading",
+        success: "User Added successfully",
+        error: "An error occured",
+      });
     } else {
       // Update existing user
-      const updatedUsers = users.map((user) =>
-        user._id === userWithProvince._id ? userWithProvince : user
-      );
-      setUsers(updatedUsers);
 
-      // Update filtered users
-      const updatedFilteredUsers = filteredUsers.map((user) =>
-        user._id === userWithProvince._id ? userWithProvince : user
-      );
-      setFilteredUsers(updatedFilteredUsers);
-
-      toast.success("User updated successfully");
+      const updated = UpdateUserData(userWithProvince._id, userWithProvince);
+      toast.promise(updated, {
+        loading: "loading",
+        success: "User updated successfully",
+        error: "An error occured",
+      });
     }
     setEditingUser(null);
     setIsAddingUser(false);
