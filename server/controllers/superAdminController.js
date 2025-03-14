@@ -3,14 +3,8 @@ import HttpError from "../Errors/HttpErros.js";
 import express from "express";
 import user from "../Models/users.js";
 import place from "../Models/places.js";
-
-// export const getAllUsers = AsyncError(async (req, res, next) => {
-//   const allUsers = await user.find().select("-password");
-//   return res.status(200).json({
-//     status: "success",
-//     data: allUsers,
-//   });
-// });
+import cloudinary from "../config/cloudinaryConfig.js";
+import fs from "fs";
 
 export const getAllData = AsyncError(async (req, res, next) => {
   const loggedInuser = req.user;
@@ -78,5 +72,22 @@ export const deletePlace = AsyncError(async (req, res, next) => {
   return res.status(200).json({
     status: "success",
     message: "Deleted Successfully",
+  });
+});
+
+export const imageUpload = AsyncError(async (req, res, next) => {
+  console.log("inside the function");
+  const file = req.file;
+  console.log(file);
+  if (!file) {
+    return next(new HttpError(400, "No file selected"));
+  }
+  const fileString = await cloudinary.uploader.upload(file.path);
+  if (fileString) {
+    fs.unlinkSync(file.path);
+  }
+  return res.status(200).json({
+    status: "success",
+    data: fileString.url,
   });
 });
