@@ -156,7 +156,7 @@ const DistrictUser = () => {
 
   // Stats for dashboard
   const getAssignedDistricts = () => {
-    return currentUser?.districts || [];
+    return currentUser?.district || [];
   };
 
   const getPlaceCountByDistrict = (district) => {
@@ -386,20 +386,6 @@ const DistrictUser = () => {
                   Places across all your districts
                 </p>
               </div>
-
-              {getAssignedDistricts()[0] && (
-                <div className="bg-white p-6 rounded-lg shadow-md">
-                  <h3 className="text-lg font-medium mb-2">
-                    {getAssignedDistricts()[0]}
-                  </h3>
-                  <p className="text-3xl font-bold">
-                    {getPlaceCountByDistrict(getAssignedDistricts()[0])}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-2">
-                    Places in this district
-                  </p>
-                </div>
-              )}
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow-md mb-6">
@@ -612,7 +598,7 @@ const DistrictUser = () => {
                     Latitude
                   </label>
                   <input
-                    type="text"
+                    type="number"
                     value={editingPlace.location.latitude}
                     onChange={(e) =>
                       handleFieldChange("location.latitude", e.target.value)
@@ -625,7 +611,7 @@ const DistrictUser = () => {
                     Longitude
                   </label>
                   <input
-                    type="text"
+                    type="number"
                     value={editingPlace.location.longitude}
                     onChange={(e) =>
                       handleFieldChange("location.longitude", e.target.value)
