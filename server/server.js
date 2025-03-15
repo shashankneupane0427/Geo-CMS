@@ -35,7 +35,7 @@ app.use(bodyParser.json());
 
 // Routes
 app.get("/", (req, res) => {
-  res.send("Welcome to the backend of the GEO CMS");
+  res.send("Welcome to the backend of the project");
 });
 app.use("/api/v1/generalUsers", userRoutes);
 app.use("/api/v1/authorities", autheticationRoutes);
