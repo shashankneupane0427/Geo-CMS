@@ -18,7 +18,7 @@ const DistrictUser = () => {
   // State for data
   const [places, setPlaces] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   console.log(user.district);
   // Nepal provinces and districts data
   const nepalData = {
@@ -294,7 +294,7 @@ const DistrictUser = () => {
   // Handle sign out
   const handleSignOut = () => {
     // In a real app, this would handle logout logic
-    alert("Signing out...");
+    logout();
     // Typically you would clear session/tokens and redirect to login page
   };
 

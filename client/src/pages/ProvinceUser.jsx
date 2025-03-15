@@ -24,7 +24,7 @@ const ProvinceUser = () => {
   const [isAddingUser, setIsAddingUser] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const fileInputRef = useRef(null);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   // State for data
   const [users, setUsers] = useState([]);
@@ -441,9 +441,9 @@ const ProvinceUser = () => {
   };
 
   // Handle sign out
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
     // In a real app, this would handle logout logic
-    alert("Signing out...");
+    logout();
     // Typically you would clear session/tokens and redirect to login page
   };
 
