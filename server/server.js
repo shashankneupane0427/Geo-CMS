@@ -9,7 +9,6 @@ import autheticationRoutes from "./routes/authenticationRoutes.js";
 import superAdmin from "./routes/superAdminRoutes.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import HttpError from "./Errors/HttpErros.js";
 import provinceRoutes from "./routes/provinceUserRoutes.js";
 
 configDotenv();
