@@ -29,7 +29,7 @@ app.use(
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.get("/", (req, res) => {
-  res.send("Welcome to the backend of the project");
+  res.send("Welcome to the backend of the GEO CMS");
 });
 app.use("/api/v1/generalUsers", userRoutes);
 app.use("/api/v1/authorities", autheticationRoutes);
