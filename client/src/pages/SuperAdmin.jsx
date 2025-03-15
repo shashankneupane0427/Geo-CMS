@@ -181,7 +181,12 @@ const SuperAdmin = () => {
     const deleteIt = deletePlace(id);
     toast.promise(deleteIt, {
       loading: "loading",
-      success: "Deleted successfully",
+      success: async () => {
+        const response = await getAllSuperAdminData();
+        setUsers(response.data.data.users);
+        setPlaces(response.data.data.places);
+        return "Place deleted Successfully";
+      },
       error: "An error occured",
     });
   };
@@ -215,7 +220,12 @@ const SuperAdmin = () => {
     const deleted = deleteSpecificUser(id);
     toast.promise(deleted, {
       loading: "loading",
-      success: "User deleted Successfully",
+      success: async () => {
+        const response = await getAllSuperAdminData();
+        setUsers(response.data.data.users);
+        setPlaces(response.data.data.places);
+        return "User deleted Successfully";
+      },
       error: "Couldnot delete the user",
     });
   };
@@ -312,7 +322,13 @@ const SuperAdmin = () => {
         const saving = addPlace(editingPlace);
         toast.promise(saving, {
           loading: "loading",
-          success: "Added the place Successfully",
+          success: async () => {
+            const response = await getAllSuperAdminData();
+            setUsers(response.data.data.users);
+            setPlaces(response.data.data.places);
+
+            return "Added the place Successfully";
+          },
           error: "Coulnot add the place",
         });
       } catch (error) {
@@ -325,7 +341,12 @@ const SuperAdmin = () => {
         const saving = updatePlace(editingPlace, editingPlace._id);
         toast.promise(saving, {
           loading: "loading",
-          success: "Updated the place Successfully",
+          success: async () => {
+            const response = await getAllSuperAdminData();
+            setUsers(response.data.data.users);
+            setPlaces(response.data.data.places);
+            return "Updated the place Successfully";
+          },
           error: "Coulnot update the place",
         });
       } catch (error) {
@@ -345,7 +366,12 @@ const SuperAdmin = () => {
       const sendRequest = addNewUser(editingUser);
       toast.promise(sendRequest, {
         loading: "loading",
-        success: "Added the user Successfully",
+        success: async () => {
+          const response = await getAllSuperAdminData();
+          setUsers(response.data.data.users);
+          setPlaces(response.data.data.places);
+          return "Added the user Successfully";
+        },
         error: "Coulnot add the user",
       });
     } else {
@@ -353,7 +379,12 @@ const SuperAdmin = () => {
       const sendRequest = UpdateUserData(editingUser._id, editingUser);
       toast.promise(sendRequest, {
         loading: "loading",
-        success: "Updated the user Successfully",
+        success: async () => {
+          const response = await getAllSuperAdminData();
+          setUsers(response.data.data.users);
+          setPlaces(response.data.data.places);
+          return "Updated the user Successfully";
+        },
         error: "Coulnot delete the user",
       });
     }

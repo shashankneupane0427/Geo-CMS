@@ -4,6 +4,7 @@ import {
   addPlace,
   updatePlace,
   uploadImage,
+  deletePlace,
 } from "../../utils/Api";
 import { useAuth } from "../context/AuthorizationContext.jsx";
 import { toast } from "sonner";
@@ -188,8 +189,21 @@ const DistrictUser = () => {
 
   // Handle place delete
   const handleDeletePlace = (id) => {
-    setPlaces(places.filter((place) => place._id !== id));
-    toast.success("Place deleted successfully");
+    try {
+      const deleting = deletePlace(id);
+      toast.promise(deleting, {
+        loading: "Deleting place...",
+        success: async () => {
+          // Remove the place from the list
+          setPlaces(places.filter((place) => place._id !== id));
+          return "Place deleted successfully";
+        },
+        error: "Failed to delete place",
+      });
+    } catch (error) {
+      console.error("Error deleting place:", error);
+      toast.error("Failed to delete place");
+    }
   };
 
   // Handle image delete
@@ -246,7 +260,11 @@ const DistrictUser = () => {
         const saving = addPlace(editingPlace);
         toast.promise(saving, {
           loading: "loading",
-          success: "Added the place Successfully",
+          success: async (response) => {
+            // Add the new place to the list
+            setPlaces([...places, response.data.data]);
+            return "Added the place Successfully";
+          },
           error: "Coulnot add the place",
         });
       } catch (error) {
@@ -259,7 +277,15 @@ const DistrictUser = () => {
         const saving = updatePlace(editingPlace, editingPlace._id);
         toast.promise(saving, {
           loading: "loading",
-          success: "Updated the place Successfully",
+          success: async (response) => {
+            // Update the place in the list
+            setPlaces(
+              places.map((place) =>
+                place._id === editingPlace._id ? editingPlace : place
+              )
+            );
+            return "Updated the place Successfully";
+          },
           error: "Coulnot update the place",
         });
       } catch (error) {

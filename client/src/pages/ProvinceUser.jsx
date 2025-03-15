@@ -10,6 +10,7 @@ import {
   updatePlace,
   uploadImage,
   getAllPlaces,
+  deletePlace,
 } from "../../utils/Api";
 
 import { toast } from "sonner";
@@ -239,10 +240,24 @@ const ProvinceUser = () => {
 
   // Handle place delete
   const handleDeletePlace = (id) => {
-    setPlaces(places.filter((place) => place._id !== id));
-    // Also update filtered places
-    setFilteredPlaces(filteredPlaces.filter((place) => place._id !== id));
-    toast.success("Place deleted successfully");
+    try {
+      const response = deletePlace(id);
+      toast.promise(response, {
+        loading: "Deleting place...",
+        success: async () => {
+          setPlaces((prevPlaces) =>
+            prevPlaces.filter((place) => place._id !== id)
+          );
+          setFilteredPlaces((prevPlaces) =>
+            prevPlaces.filter((place) => place._id !== id)
+          );
+          return "Place deleted successfully";
+        },
+        error: "Failed to delete place",
+      });
+    } catch (error) {
+      return new Error("Error deleting place:", error);
+    }
   };
 
   // Handle image delete
@@ -275,15 +290,20 @@ const ProvinceUser = () => {
   // Handle user delete
   const handleDeleteUser = async (id) => {
     try {
-      // Call the API to delete the user
-      await deleteSpecificUser(id); // Replace with your actual API call
-      // Optimistic UI update
-      setUsers((prevUsers) => prevUsers.filter((user) => user._id !== id));
-      // Also update filtered users
-      setFilteredUsers((prevUsers) =>
-        prevUsers.filter((user) => user._id !== id)
-      );
-      toast.success("User deleted successfully");
+      const response = deleteSpecificUser(id);
+      toast.promise(response, {
+        loading: "Deleting user...",
+        success: async () => {
+          const response = await getProvinceUserData();
+          if (response?.data?.data) {
+            setUsers(response.data.data);
+            // Filter users based on province
+            filterUsersByProvince(response.data.data, user?.province);
+          }
+          return "User deleted successfully";
+        },
+        error: "Failed to delete user",
+      });
     } catch (error) {
       console.error("Error deleting user:", error);
       toast.error("Could not delete the user");
@@ -353,7 +373,15 @@ const ProvinceUser = () => {
         const saving = addPlace(editingPlace);
         toast.promise(saving, {
           loading: "loading",
-          success: "Added the place Successfully",
+          success: async () => {
+            const response = await getAllPlaces();
+            const tempFilteredPlaces = response.data.data.filter(
+              (place) => place.province === user?.province
+            );
+            setFilteredPlaces(tempFilteredPlaces);
+            setPlaces(tempFilteredPlaces);
+            return "Added the place Successfully";
+          },
           error: "Coulnot add the place",
         });
       } catch (error) {
@@ -366,7 +394,15 @@ const ProvinceUser = () => {
         const saving = updatePlace(editingPlace, editingPlace._id);
         toast.promise(saving, {
           loading: "loading",
-          success: "Updated the place Successfully",
+          success: async () => {
+            const response = await getAllPlaces();
+            const tempFilteredPlaces = response.data.data.filter(
+              (place) => place.province === user?.province
+            );
+            setFilteredPlaces(tempFilteredPlaces);
+            setPlaces(tempFilteredPlaces);
+            return "Updated the place Successfully";
+          },
           error: "Coulnot update the place",
         });
       } catch (error) {
@@ -395,7 +431,15 @@ const ProvinceUser = () => {
 
       toast.promise(added, {
         loading: "loading",
-        success: "User Added successfully",
+        success: async () => {
+          const response = await getProvinceUserData();
+          if (response?.data?.data) {
+            setUsers(response.data.data);
+            // Filter users based on province
+            filterUsersByProvince(response.data.data, user?.province);
+          }
+          return "User added successfully";
+        },
         error: "An error occured",
       });
     } else {
@@ -404,7 +448,15 @@ const ProvinceUser = () => {
       const updated = UpdateUserData(userWithProvince._id, userWithProvince);
       toast.promise(updated, {
         loading: "loading",
-        success: "User updated successfully",
+        success: async () => {
+          const response = await getProvinceUserData();
+          if (response?.data?.data) {
+            setUsers(response.data.data);
+            // Filter users based on province
+            filterUsersByProvince(response.data.data, user?.province);
+          }
+          return "User updated successfully";
+        },
         error: "An error occured",
       });
     }
