@@ -42,10 +42,7 @@ app.use("api/v1/authorities", autheticationRoutes);
 app.use("api/v1/superadmin", superAdmin);
 app.use("api/v1/provinceuser", provinceRoutes);
 
-// 404 handler
-app.use("*", (req, res, next) => {
-  return next(new HttpError(404, `The URL ${req.originalUrl} was not found`));
-});
+
 
 // Error handler
 app.use(GlobalError);
@@ -53,11 +50,9 @@ app.use(GlobalError);
 // Dynamic port for deployment environments like Vercel
 const PORT = process.env.PORT || 5001;
 
-// Export for Vercel serverless functions
-if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => {
     console.log(`App currently listening on port number ${PORT}`);
   });
-}
+
 
 export default app;
