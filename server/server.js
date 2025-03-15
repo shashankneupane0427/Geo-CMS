@@ -40,8 +40,8 @@ app.use("*", (req, res, next) => {
 });
 
 app.use(GlobalError);
-app.listen(process.env.PORT_NUMBER, () => {
+app.listen(5001, () => {
   console.log(
-    `app currently listening on port number ${process.env.PORT_NUMBER}`
+    `app currently listening on port number 5001`
   );
 });
