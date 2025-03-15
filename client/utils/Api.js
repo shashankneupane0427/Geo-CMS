@@ -1,7 +1,10 @@
 import axios from "axios";
 
+const BACKEND_URI = import.meta.env.VITE_BACKEND_URI;
+console.log(BACKEND_URI);
+
 const base = axios.create({
-  baseURL: "http://localhost:5001/api/v1",
+  baseURL: `${BACKEND_URI}/api/v1`,
   headers: {
     "Content-Type": "application/json",
   },
@@ -27,16 +30,12 @@ export const addPlace = (data) => {
 export const deletePlace = (id) => base.delete(`/superadmin/places/${id}`);
 
 export const uploadImage = (formData) => {
-  return axios.post(
-    `http://localhost:5001/api/v1/superadmin/places/image`,
-    formData,
-    {
-      withCredentials: true,
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }
-  );
+  return axios.post(`${BACKEND_URI}/api/v1/superadmin/places/image`, formData, {
+    withCredentials: true,
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 };
 
 export const getProvinceUserData = () => {
