@@ -5,7 +5,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon server.js",
-    "seeder": "node seeder.js"
+    "seeder": "node seeder.js",
+    "build": "npm run build"
   },
   "type": "module",
   "author": "",
