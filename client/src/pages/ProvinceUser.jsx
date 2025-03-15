@@ -518,7 +518,7 @@ const ProvinceUser = () => {
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow">
+              {/* <div className="bg-white p-6 rounded-lg shadow">
                 <h3 className="text-lg font-medium">District Coverage</h3>
                 <p className="text-3xl font-bold mt-2">
                   {getDistrictCoverage()}%
@@ -526,16 +526,16 @@ const ProvinceUser = () => {
                 <p className="text-sm text-gray-500 mt-1">
                   district with assigned users
                 </p>
-              </div>
+              </div> */}
 
-              <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-3">
+              {/* <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-3">
                 <h3 className="text-lg font-medium mb-4">Places by District</h3>
                 <div className="h-64 flex items-center justify-center bg-gray-100 rounded">
                   <p className="text-gray-500">
                     Chart will be displayed here showing place distribution
                   </p>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         )}
@@ -569,12 +569,7 @@ const ProvinceUser = () => {
                     >
                       district
                     </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                    >
-                      Status
-                    </th>
+
                     <th
                       scope="col"
                       className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -596,17 +591,7 @@ const ProvinceUser = () => {
                           {user.district ? user.district.join(", ") : "None"}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            user.isActive
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {user.isActive ? "Active" : "Inactive"}
-                        </span>
-                      </td>
+
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
                           onClick={() => handleEditUser(user)}
@@ -768,7 +753,7 @@ const ProvinceUser = () => {
                     Latitude
                   </label>
                   <input
-                    type="text"
+                    type="number"
                     value={editingPlace.location.latitude}
                     onChange={(e) =>
                       handleFieldChange("location.latitude", e.target.value)
@@ -781,7 +766,7 @@ const ProvinceUser = () => {
                     Longitude
                   </label>
                   <input
-                    type="text"
+                    type="number"
                     value={editingPlace.location.longitude}
                     onChange={(e) =>
                       handleFieldChange("location.longitude", e.target.value)
