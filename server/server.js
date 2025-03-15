@@ -14,20 +14,26 @@ import provinceRoutes from "./routes/provinceUserRoutes.js";
 
 configDotenv();
 const app = express();
+
+// Connect to MongoDB
 mongoose
   .connect(process.env.DB_URI)
   .then(() => console.log("Database connected successfully"))
-  .catch((err) => console.log(`couldnot connect to databse ${err.message}`));
+  .catch((err) => console.log(`Could not connect to database: ${err.message}`));
 
+// Middleware
 app.use(morgan("dev"));
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    // Update this to include your Vercel deployment URL and any other frontend URLs
+    origin: ["http://localhost:5173", "https://your-frontend-url.vercel.app"],
     credentials: true,
   })
 );
 app.use(cookieParser());
 app.use(bodyParser.json());
+
+// Routes
 app.get("/", (req, res) => {
   res.send("Welcome to the backend of the GEO CMS");
 });
@@ -35,13 +41,23 @@ app.use("/api/v1/generalUsers", userRoutes);
 app.use("/api/v1/authorities", autheticationRoutes);
 app.use("/api/v1/superadmin", superAdmin);
 app.use("/api/v1/provinceuser", provinceRoutes);
+
+// 404 handler
 app.use("*", (req, res, next) => {
-  return next(new HttpError(404, `the url ${req.originalUrl} was not found`));
+  return next(new HttpError(404, `The URL ${req.originalUrl} was not found`));
 });
 
+// Error handler
 app.use(GlobalError);
-app.listen(5001, () => {
-  console.log(
-    `app currently listening on port number 5001`
-  );
-});
+
+// Dynamic port for deployment environments like Vercel
+const PORT = process.env.PORT || 5001;
+
+// Export for Vercel serverless functions
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`App currently listening on port number ${PORT}`);
+  });
+}
+
+export default app;
