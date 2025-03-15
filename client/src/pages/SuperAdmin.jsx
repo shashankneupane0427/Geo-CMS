@@ -124,7 +124,7 @@ const SuperAdmin = () => {
     password: "",
     role: "District User",
     province: "",
-    districts: [],
+    district: [],
   };
 
   const [users, setUsers] = useState(null);
@@ -170,7 +170,7 @@ const SuperAdmin = () => {
 
   // Handle add new place
   const handleAddPlace = () => {
-    setEditingPlace({ ...newPlaceTemplate, id: places.length + 1 });
+    setEditingPlace({ ...newPlaceTemplate });
     setIsAdding(true);
     setActiveTab("editPlace");
   };
@@ -619,9 +619,7 @@ const SuperAdmin = () => {
                 >
                   <div className="relative h-48">
                     <img
-                      src={
-                        place.images[0] || "https://via.placeholder.com/400x200"
-                      }
+                      src={place.images[0]}
                       alt={place.title}
                       className="w-full h-full object-cover"
                     />
@@ -730,7 +728,7 @@ const SuperAdmin = () => {
                     Latitude
                   </label>
                   <input
-                    type="text"
+                    type="number"
                     value={editingPlace.location.latitude}
                     onChange={(e) =>
                       handleFieldChange("location.latitude", e.target.value)
@@ -743,7 +741,7 @@ const SuperAdmin = () => {
                     Longitude
                   </label>
                   <input
-                    type="text"
+                    type="number"
                     value={editingPlace.location.longitude}
                     onChange={(e) =>
                       handleFieldChange("location.longitude", e.target.value)
