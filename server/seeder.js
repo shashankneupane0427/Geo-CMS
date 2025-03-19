@@ -2,29 +2,29 @@ import express from "express";
 import mongoose from "mongoose";
 import { configDotenv } from "dotenv";
 import place from "./Models/places.js";
-import nepaliDistricts from "./utils/placeData.js";
+import nepaliSchools from "./utils/placeData.js";
 import AsyncError from "./Errors/AsyncError.js";
 import user from "./Models/users.js";
 configDotenv();
 const app = express();
 const userHaru = [
   {
-    email: "admin@geo.com",
+    email: "admin@gmail.com",
     password: "admin123",
     role: "admin",
     province: "N/A",
     district: [],
   },
   {
-    email: "editor@geo.com",
-    password: "editor123",
+    email: "bagmatiprovince@gmail.com",
+    password: "bagmatiprovince123",
     role: "Province User",
     province: "Bagmati Province",
     district: [],
   },
   {
-    email: "user1@geo.com",
-    password: "user123",
+    email: "kathmandudistrict@gmail.com",
+    password: "kathmandudistrict123",
     role: "District User",
     province: "Bagmati Province",
     district: ["Kathmandu", "Lalitpur"],
@@ -56,7 +56,7 @@ const seed = async () => {
     console.log("Cleared the places");
     console.log(".........");
     console.log("seeding new data on the places collection");
-    await place.insertMany(nepaliDistricts);
+    await place.insertMany(nepaliSchools);
     await user.deleteMany();
     await user.insertMany(userHaru);
     console.log("data seeded successfully");

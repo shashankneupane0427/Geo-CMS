@@ -163,11 +163,7 @@ function App() {
                           {place.description}
                         </p>
 
-                        <div className="flex mt-3">
-                          <button className="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-1.5 text-center mr-2">
-                            View Details
-                          </button>
-                        </div>
+                        <div className="flex mt-3"></div>
                       </div>
                     </div>
                   </Popup>
