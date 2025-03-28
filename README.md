@@ -17,7 +17,7 @@ GeoCMS is a map-based Content Management System (CMS) built using the MERN stack
 
 ## Tech Stack
 
-- **Frontend:** React, Leaflet (for maps), Tailwind CSS
+- **Frontend:** React, Leaflet (for map), Tailwind CSS
 - **Backend:** Node.js, Express.js
 - **Database:** MongoDB
 - **Authentication:** JWT, bcrypt
