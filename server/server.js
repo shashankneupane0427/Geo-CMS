@@ -38,20 +38,19 @@ app.get("/", (req, res) => {
 });
 app.use("/api/v1/generalUsers", userRoutes);
 app.use("/api/v1/authorities", autheticationRoutes);
-app.use("/api/v1/superadmin", superAdmin);
 app.use("/api/v1/provinceuser", provinceRoutes);
-
-
+app.use("/api/v1/superadmin", superAdmin);
 
 // Error handler
 app.use(GlobalError);
 
-// Dynamic port for deployment environments like Vercel
-const PORT = process.env.PORT || 5001;
-
+// For local development only
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5001;
   app.listen(PORT, () => {
     console.log(`App currently listening on port number ${PORT}`);
   });
+}
 
-
+// Export for Vercel
 export default app;
