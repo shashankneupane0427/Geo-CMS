@@ -84,8 +84,8 @@ const connectToDatabase = async () => {
 
 // Basic middleware
 app.use(cors({
-  origin: ["http://localhost:5173", "https://geo-cms.vercel.app"],
-  credentials: true,
+  origin: ['https://geocmsproject.vercel.app', 'http://localhost:5173'], // Add your frontend domains
+  credentials: true
 }));
 app.use(cookieParser());
 app.use(bodyParser.json());
