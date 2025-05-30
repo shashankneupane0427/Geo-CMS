@@ -2,8 +2,33 @@ import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { configDotenv } from "dotenv";
+import mongoose from "mongoose";
 
+configDotenv();
 const app = express();
+
+// Database connection
+let isConnected = false;
+
+const connectToDatabase = async () => {
+  if (isConnected) {
+    return;
+  }
+  
+  try {
+    console.log("Attempting database connection...");
+    await mongoose.connect(process.env.DB_URI, {
+      bufferCommands: false,
+      serverSelectionTimeoutMS: 5000,
+    });
+    isConnected = true;
+    console.log("Database connected successfully");
+  } catch (error) {
+    console.error("Database connection error:", error.message);
+    throw error;
+  }
+};
 
 // Basic middleware
 app.use(cors({
@@ -13,13 +38,23 @@ app.use(cors({
 app.use(cookieParser());
 app.use(bodyParser.json());
 
-// Test route
-app.get("/", (req, res) => {
-  res.json({
-    message: "Server is working!",
-    timestamp: new Date().toISOString(),
-    env: process.env.NODE_ENV || 'development'
-  });
+// Test route with database
+app.get("/", async (req, res) => {
+  try {
+    await connectToDatabase();
+    res.json({
+      message: "Server is working!",
+      database: isConnected ? "Connected" : "Disconnected",
+      timestamp: new Date().toISOString(),
+      env: process.env.NODE_ENV || 'development'
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Database connection failed",
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // Test API route
