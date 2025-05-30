@@ -5,6 +5,17 @@ import cookieParser from "cookie-parser";
 import { configDotenv } from "dotenv";
 import mongoose from "mongoose";
 
+// Try to import one route first
+let userRoutes = null;
+try {
+  console.log("Importing user routes...");
+  const userRoutesModule = await import("./routes/generalUsersRoute.js");
+  userRoutes = userRoutesModule.default;
+  console.log("User routes imported successfully");
+} catch (error) {
+  console.error("Failed to import user routes:", error.message);
+}
+
 configDotenv();
 const app = express();
 
@@ -61,9 +72,18 @@ app.get("/", async (req, res) => {
 app.get("/api/test", (req, res) => {
   res.json({
     message: "API is working!",
-    status: "OK"
+    status: "OK",
+    routesLoaded: {
+      userRoutes: !!userRoutes
+    }
   });
 });
+
+// Add user routes if available
+if (userRoutes) {
+  app.use("/api/v1/generalUsers", userRoutes);
+  console.log("User routes added to app");
+}
 
 // 404 handler
 app.use("*", (req, res) => {
