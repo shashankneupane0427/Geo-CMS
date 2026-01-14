@@ -9,16 +9,16 @@ function AuthorizationContext({ children }) {
   useEffect(() => {
     try {
       const storedUser = localStorage.getItem("user");
-      console.log(storedUser);
+      // console.log(storedUser);
       if (storedUser) {
         const parsedUser = JSON.parse(storedUser);
-        console.log("Successfully loaded user from localStorage:", parsedUser);
+        // console.log("Successfully loaded user from localStorage:", parsedUser);
         setUser(parsedUser);
       } else {
-        console.log("No user data found in localStorage");
+        // console.log("No user data found in localStorage");
       }
     } catch (error) {
-      console.error("Error loading user from localStorage:", error);
+      // console.error("Error loading user from localStorage:", error);
     }
   }, []);
 

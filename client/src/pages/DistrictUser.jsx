@@ -20,7 +20,7 @@ const DistrictUser = () => {
   const [places, setPlaces] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const { user, logout } = useAuth();
-  console.log(user.district);
+  // console.log(user.district);
   // Nepal provinces and districts data
   const nepalData = {
     "Province 1": [
@@ -134,7 +134,7 @@ const DistrictUser = () => {
       try {
         // Fetch all places
         const response = await getAllPlaces();
-        console.log(response.data.data);
+        // console.log(response.data.data);
 
         // Get current user information
         setCurrentUser(user);

@@ -162,7 +162,7 @@ const ProvinceUser = () => {
           // Filter users based on province
           filterUsersByProvince(response.data.data, user?.province);
         }
-        console.log(responsePlace);
+        // console.log(responsePlace);
         const tempFilteredPlaces = responsePlace.data.data.filter(
           (place) => place.province === user?.province
         );
@@ -418,7 +418,7 @@ const ProvinceUser = () => {
   // Handle user update or add
   const handleSaveUser = () => {
     // Ensure province is set
-    console.log(editingUser);
+    // console.log(editingUser);
     const userWithProvince = {
       ...editingUser,
       province: currentUser?.province,
@@ -426,7 +426,7 @@ const ProvinceUser = () => {
 
     if (isAddingUser) {
       // Add new user
-      console.log(editingUser);
+      // console.log(editingUser);
       const added = addNewUser(userWithProvince);
 
       toast.promise(added, {

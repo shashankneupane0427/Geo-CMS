@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const BACKEND_URI = import.meta.env.VITE_BACKEND_URI;
-console.log(BACKEND_URI);
+// console.log(BACKEND_URI);
 
 const base = axios.create({
   baseURL: `${BACKEND_URI}/api/v1`,
@@ -13,6 +13,10 @@ const base = axios.create({
 
 export const getAllPlaces = () => base.get("/generalUsers/places");
 export const login = (data) => base.post("/authorities/login", data);
+export const register = (data) => {
+  return base.post("/authorities/register", data); 
+};
+
 export const getAllSuperAdminData = () => base.get("/superadmin/allData");
 export const deleteSpecificUser = (id) => base.delete(`/superAdmin/user/${id}`);
 export const UpdateUserData = (id, data) => {

@@ -134,12 +134,12 @@ const SuperAdmin = () => {
   useEffect(() => {
     const sendRequest = async () => {
       const response = await getAllSuperAdminData();
-      console.log("sending request to backend");
-      console.log(response.data.data.users);
+      // console.log("sending request to backend");
+      // console.log(response.data.data.users);
       setUsers(response.data.data.users);
       setPlaces(response.data.data.places);
     };
-    console.log("calling the function");
+    // console.log("calling the function");
     sendRequest();
   }, []);
 
@@ -177,7 +177,7 @@ const SuperAdmin = () => {
 
   // Handle place delete
   const handleDeletePlace = async (id) => {
-    console.log(id);
+    // console.log(id);
     const deleteIt = deletePlace(id);
     toast.promise(deleteIt, {
       loading: "loading",
