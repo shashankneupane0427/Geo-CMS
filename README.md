@@ -75,8 +75,6 @@ GeoCMS is a map-based Content Management System (CMS) built using the MERN stack
   - Nginx handles routing between frontend and backend.
 
 
-### Live Link : https://geocmsproject.vercel.app/
-
 ## Contributors:
 - Shashank Neupane
 - Saimon Neupane
