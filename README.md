@@ -55,7 +55,7 @@ GeoCMS is a map-based Content Management System (CMS) built using the MERN stack
    JWT_SECRET=your-jwt-secret
    PORT=5001
    ```
-4. **Run the development server
+4. **Run the development server**
    For Server:
    ```bash
    npm run dev
